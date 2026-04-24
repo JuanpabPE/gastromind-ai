@@ -1,0 +1,25 @@
+# Variables de entorno — NUNCA subir al repo
+backend/.env
+frontend/.env
+
+# Entornos virtuales Python
+backend/venv/
+.venv/
+
+# Node modules
+frontend/node_modules/
+
+# Builds
+frontend/dist/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# VS Code
+.vscode/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
