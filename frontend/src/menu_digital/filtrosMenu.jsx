@@ -51,6 +51,25 @@ export default function FiltrosMenu({ filtros, setFiltros }) {
           style={{ width: "100%" }}
         />
       </div>
+      <div style={estilos.grupo}>
+        <label style={estilos.label}>
+          Proteínas mínimas: {filtros.proteinasMin}g
+        </label>
+        <input
+          type="range"
+          min="0"
+          max="50"
+          step="5"
+          value={filtros.proteinasMin}
+          onChange={(e) =>
+            setFiltros((f) => ({
+              ...f,
+              proteinasMin: parseInt(e.target.value),
+            }))
+          }
+          style={{ width: "100%" }}
+        />
+      </div>
 
       <div style={estilos.grupo}>
         <label style={estilos.label}>Preferencias</label>

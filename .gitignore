@@ -1,4 +1,4 @@
-# Variables de entorno — NUNCA subir al repo
+# Variables de entorno
 backend/.env
 frontend/.env
 

@@ -1,12 +1,94 @@
 import { registrarConsumo } from "../historial_consumo/historialApi";
+import { useState, useEffect } from "react";
+import { supabase } from "../compartido/api/cliente";
+
+const SEDES = [
+  "Surco - Av. Primavera",
+  "San Isidro - El Olivar",
+  "Miraflores - Larco",
+  "La Molina",
+  "San Borja",
+  "Aeropuerto",
+];
 
 export default function FichaNutricional({ plato, onCerrar }) {
+  const [alerta, setAlerta] = useState(null);
+  const [sede, setSede] = useState("Surco - Av. Primavera");
+
+  useEffect(() => {
+    async function verificar() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: perfil } = await supabase
+        .from("perfiles")
+        .select("alergias, enfermedades")
+        .eq("usuario_id", user.id)
+        .single();
+
+      if (!perfil) return;
+
+      const alergenos = plato.alergenos || [];
+      const alergias = (perfil.alergias || []).map((a) => a.toLowerCase());
+      const encontrados = alergenos.filter((a) =>
+        alergias.includes(a.toLowerCase()),
+      );
+
+      if (encontrados.length > 0) {
+        setAlerta({
+          tipo: "peligro",
+          mensaje: `⚠️ Este plato contiene ${encontrados.join(", ")} — ingredientes que debes evitar según tu perfil.`,
+        });
+        return;
+      }
+
+      if (
+        perfil.enfermedades?.includes("Diabetes") &&
+        plato.carbohidratos > 60
+      ) {
+        setAlerta({
+          tipo: "precaucion",
+          mensaje: `⚠️ Este plato tiene ${plato.carbohidratos}g de carbohidratos. Consúmelo con moderación si tienes diabetes.`,
+        });
+        return;
+      }
+
+      if (perfil.enfermedades?.includes("Hipertensión") && plato.grasas > 25) {
+        setAlerta({
+          tipo: "precaucion",
+          mensaje: `⚠️ Este plato puede ser alto en sodio. Consúmelo con moderación si tienes hipertensión.`,
+        });
+      }
+    }
+    verificar();
+  }, [plato]);
   return (
     <div style={estilos.overlay} onClick={onCerrar}>
       <div style={estilos.modal} onClick={(e) => e.stopPropagation()}>
         <button onClick={onCerrar} style={estilos.cerrar}>
           ✕
         </button>
+
+        {alerta && (
+          <div
+            style={{
+              backgroundColor:
+                alerta.tipo === "peligro" ? "#fff5f5" : "#fffbeb",
+              border: `1px solid ${alerta.tipo === "peligro" ? "#fed7d7" : "#fbd38d"}`,
+              color: alerta.tipo === "peligro" ? "#e53e3e" : "#c05621",
+              padding: "10px 14px",
+              borderRadius: "8px",
+              fontSize: "0.85rem",
+              fontWeight: "500",
+              marginBottom: "1rem",
+              lineHeight: "1.4",
+            }}
+          >
+            {alerta.mensaje}
+          </div>
+        )}
 
         {/* Contenido scrolleable */}
         <div style={estilos.contenidoScrolleable}>
@@ -85,15 +167,55 @@ export default function FichaNutricional({ plato, onCerrar }) {
 
         {/* Botón fijo en la parte baja */}
         <div style={estilos.botonesContenedor}>
-          <button
-            onClick={async () => {
-              await registrarConsumo(plato);
-              alert(`✅ "${plato.nombre}" registrado en tu historial`);
+          <div
+            style={{
+              marginTop: "1.5rem",
+              paddingTop: "1rem",
+              borderTop: "1px solid #f0f0f0",
             }}
-            style={estilos.btnPedir}
           >
-            + Registrar en mi historial
-          </button>
+            <label
+              style={{
+                fontSize: "0.82rem",
+                fontWeight: "600",
+                color: "#555",
+                display: "block",
+                marginBottom: "6px",
+              }}
+            >
+              📍 ¿En qué sede estás?
+            </label>
+            <select
+              value={sede}
+              onChange={(e) => setSede(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "8px 12px",
+                borderRadius: "8px",
+                border: "1px solid #e0e0e0",
+                fontSize: "0.9rem",
+                marginBottom: "10px",
+                backgroundColor: "#fff",
+              }}
+            >
+              {SEDES.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+            <button
+              onClick={async () => {
+                await registrarConsumo({ ...plato, sede });
+                alert(
+                  `✅ "${plato.nombre}" registrado en tu historial — ${sede}`,
+                );
+              }}
+              style={estilos.btnPedir}
+            >
+              + Registrar en mi historial
+            </button>
+          </div>
         </div>
       </div>
     </div>

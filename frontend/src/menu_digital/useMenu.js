@@ -14,6 +14,7 @@ export function useMenu() {
     diabetes: false,
     hipertension: false,
     caloriasMax: 1000,
+    proteinasMin: 0,
   });
   const [perfil, setPerfil] = useState(null);
   const { obtenerPerfil } = usePerfil();

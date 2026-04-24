@@ -14,6 +14,8 @@ export async function obtenerMenu(filtros = {}) {
   if (filtros.diabetes) query = query.eq("apto_diabetes", true);
   if (filtros.hipertension) query = query.eq("apto_hipertension", true);
   if (filtros.caloriasMax) query = query.lte("calorias", filtros.caloriasMax);
+  if (filtros.proteinasMin && filtros.proteinasMin > 0)
+    query = query.gte("proteinas", filtros.proteinasMin);
 
   const { data, error } = await query;
   if (error) return [];

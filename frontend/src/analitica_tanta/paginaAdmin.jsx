@@ -11,12 +11,14 @@ export default function PaginaAdmin() {
     async function cargar() {
       const { data: historial } = await supabase
         .from("historial")
-        .select("plato_nombre, calorias, proteinas, sede, fecha")
+        .select("plato_nombre, calorias, proteinas, sede, fecha, usuario_id")
         .order("fecha", { ascending: false });
 
       const { data: perfiles } = await supabase
         .from("perfiles")
-        .select("alergias, enfermedades, preferencias, puntos_fidelidad");
+        .select(
+          "alergias, enfermedades, preferencias, puntos_fidelidad, usuario_id",
+        );
 
       if (!historial || !perfiles) return;
 
@@ -30,6 +32,16 @@ export default function PaginaAdmin() {
         .slice(0, 5)
         .map(([nombre, cantidad]) => ({ nombre, cantidad }));
 
+      // Por sede
+      const porSede = {};
+      historial.forEach((h) => {
+        const sede = h.sede || "Sin especificar";
+        porSede[sede] = (porSede[sede] || 0) + 1;
+      });
+      const registrosPorSede = Object.entries(porSede)
+        .sort((a, b) => b[1] - a[1])
+        .map(([sede, cantidad]) => ({ sede, cantidad }));
+
       // Alérgenos más frecuentes
       const alergenosConteo = {};
       perfiles.forEach((p) => {
@@ -39,6 +51,18 @@ export default function PaginaAdmin() {
         });
       });
       const alergenosFrecuentes = Object.entries(alergenosConteo)
+        .sort((a, b) => b[1] - a[1])
+        .map(([nombre, cantidad]) => ({ nombre, cantidad }));
+
+      // Enfermedades más frecuentes
+      const enfermedadesConteo = {};
+      perfiles.forEach((p) => {
+        (p.enfermedades || []).forEach((e) => {
+          if (e !== "Ninguna")
+            enfermedadesConteo[e] = (enfermedadesConteo[e] || 0) + 1;
+        });
+      });
+      const enfermedadesFrecuentes = Object.entries(enfermedadesConteo)
         .sort((a, b) => b[1] - a[1])
         .map(([nombre, cantidad]) => ({ nombre, cantidad }));
 
@@ -55,11 +79,12 @@ export default function PaginaAdmin() {
         totalRegistros: historial.length,
         totalUsuarios: perfiles.length,
         platosMasPedidos,
+        registrosPorSede,
         alergenosFrecuentes,
-        preferencias: Object.entries(prefConteo).map(([nombre, cantidad]) => ({
-          nombre,
-          cantidad,
-        })),
+        enfermedadesFrecuentes,
+        preferencias: Object.entries(prefConteo)
+          .sort((a, b) => b[1] - a[1])
+          .map(([nombre, cantidad]) => ({ nombre, cantidad })),
         caloriasPromedio: historial.length
           ? Math.round(
               historial.reduce((s, h) => s + (h.calorias || 0), 0) /
@@ -171,6 +196,45 @@ export default function PaginaAdmin() {
                   }}
                 >
                   {p.cantidad} usuarios
+                </span>
+              </div>
+            ))
+          )}
+        </div>
+        {/* Por sede */}
+        <div style={estilos.seccion}>
+          <h2 style={estilos.tituloSeccion}>📍 Registros por sede</h2>
+          {datos.registrosPorSede.length === 0 ? (
+            <p style={{ color: "#888", fontSize: "0.9rem" }}>Sin datos aún</p>
+          ) : (
+            datos.registrosPorSede.map((s, i) => (
+              <div key={i} style={estilos.itemRanking}>
+                <span style={{ flex: 1, fontSize: "0.9rem" }}>{s.sede}</span>
+                <span style={estilos.rankCount}>{s.cantidad} registros</span>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Condiciones de salud */}
+        <div style={estilos.seccion}>
+          <h2 style={estilos.tituloSeccion}>
+            🏥 Condiciones de salud frecuentes
+          </h2>
+          {datos.enfermedadesFrecuentes.length === 0 ? (
+            <p style={{ color: "#888", fontSize: "0.9rem" }}>Sin datos aún</p>
+          ) : (
+            datos.enfermedadesFrecuentes.map((e, i) => (
+              <div key={i} style={estilos.itemRanking}>
+                <span style={{ flex: 1, fontSize: "0.9rem" }}>{e.nombre}</span>
+                <span
+                  style={{
+                    ...estilos.rankCount,
+                    backgroundColor: "#faf5ff",
+                    color: "#805ad5",
+                  }}
+                >
+                  {e.cantidad} usuarios
                 </span>
               </div>
             ))
