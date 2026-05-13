@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useAuth } from "./useAuth";
 import { useNavigate, Link } from "react-router-dom";
 import logoTanta from "../assets/images/logo_tanta.png";
@@ -21,14 +21,30 @@ const CRITERIOS_CONTRASEÑA = {
   },
 };
 
-// Generar contraseña aleatoria muy segura
+// Generar contraseña aleatoria muy segura (garantiza todos los criterios)
 function generarContraseñaAleatoria() {
-  const caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}';:\"\\|,.<>/?";
-  let contraseña = "";
-  for (let i = 0; i < 12; i++) {
-    contraseña += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+  const mayusculas = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const minusculas = "abcdefghijklmnopqrstuvwxyz";
+  const numeros = "0123456789";
+  const especiales = "!@#$%^&*()_+-=[]{}';:\"\\|,.<>/?";
+  
+  // Garantizar al menos uno de cada tipo
+  let contraseña = [
+    mayusculas[Math.floor(Math.random() * mayusculas.length)],
+    minusculas[Math.floor(Math.random() * minusculas.length)],
+    numeros[Math.floor(Math.random() * numeros.length)],
+    especiales[Math.floor(Math.random() * especiales.length)],
+  ];
+  
+  // Completar hasta 12 caracteres con mezcla aleatoria
+  const todos = mayusculas + minusculas + numeros + especiales;
+  for (let i = contraseña.length; i < 12; i++) {
+    contraseña.push(todos[Math.floor(Math.random() * todos.length)]);
   }
-  return contraseña;
+  
+  // Mezclar para que no sea predecible
+  contraseña = contraseña.sort(() => Math.random() - 0.5);
+  return contraseña.join("");
 }
 
 function evaluarFortalezaContraseña(password) {
@@ -63,7 +79,7 @@ export default function PaginaRegister() {
   const [mostrarPassword, setMostrarPassword] = useState(false);
   const [mostrarConfirmPassword, setMostrarConfirmPassword] = useState(false);
   const [mostrarTooltipSugerencia, setMostrarTooltipSugerencia] = useState(false);
-  const [contraseñaSugerida, setContraseñaSugerida] = useState("");
+  const contraseñaSugeridaRef = useRef("");
 
   const fortaleza = evaluarFortalezaContraseña(form.password);
   const contraseñasCoinciden = form.password === form.confirmPassword && form.password !== "";
@@ -76,9 +92,9 @@ export default function PaginaRegister() {
 
   function toggleSugerencia() {
     if (!mostrarTooltipSugerencia) {
-      // Mostrar sugerencia
+      // Solo mostrar sugerencia (sin aplicar aún)
       const sugerida = generarContraseñaAleatoria();
-      setContraseñaSugerida(sugerida);
+      contraseñaSugeridaRef.current = sugerida;
       setMostrarTooltipSugerencia(true);
     } else {
       // Ocultar sugerencia
@@ -87,11 +103,12 @@ export default function PaginaRegister() {
   }
 
   function aplicarSugerencia() {
-    setForm(prevForm => ({
-      ...prevForm,
-      password: contraseñaSugerida,
-      confirmPassword: contraseñaSugerida,
-    }));
+    // Aplicar la sugerencia y cerrar
+    setForm({
+      ...form,
+      password: contraseñaSugeridaRef.current,
+      confirmPassword: contraseñaSugeridaRef.current,
+    });
     setMostrarTooltipSugerencia(false);
   }
 
@@ -154,18 +171,18 @@ export default function PaginaRegister() {
                   style={estilos.botonTooltip}
                   title="Generar sugerencia de contraseña"
                 >
-                  💡
+                  Sugerir
                 </button>
                 {mostrarTooltipSugerencia && (
                   <div style={estilos.tooltip}>
                     <div style={estilos.tooltipContenido}>
-                      <p style={estilos.tooltipTexto}>{contraseñaSugerida}</p>
+                      <p style={estilos.tooltipTexto}>{contraseñaSugeridaRef.current}</p>
                       <button
                         type="button"
                         onClick={aplicarSugerencia}
                         style={estilos.botonAplicar}
                       >
-                        ✓ Usar esta
+                        Usar esta
                       </button>
                     </div>
                   </div>
@@ -266,7 +283,7 @@ export default function PaginaRegister() {
               <p style={estilos.errorValidacion}>Las contraseñas no coinciden</p>
             )}
             {contraseñasCoinciden && (
-              <p style={estilos.exitoValidacion}>✓ Contraseñas coinciden</p>
+              <p style={estilos.exitoValidacion}>Contraseñas coinciden</p>
             )}
           </div>
 
@@ -378,11 +395,13 @@ const estilos = {
   botonTooltip: {
     background: "none",
     border: "none",
-    fontSize: "1.1rem",
+    fontSize: "0.85rem",
     cursor: "pointer",
-    padding: "2px 6px",
-    opacity: 0.6,
-    transition: "opacity 0.2s",
+    padding: "6px 12px",
+    color: "#E91E63",
+    fontWeight: "600",
+    transition: "all 0.2s",
+    fontFamily: "'Montserrat', sans-serif",
   },
   tooltip: {
     position: "absolute",
