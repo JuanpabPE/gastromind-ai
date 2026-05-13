@@ -5,18 +5,40 @@ import { useNavigate, Link } from "react-router-dom";
 // Criterios de validación de contraseña
 const CRITERIOS_CONTRASEÑA = {
   minimo: { test: (p) => p.length >= 6, label: "Mínimo 6 caracteres" },
-  mayuscula: { test: (p) => /[A-Z]/.test(p), label: "Al menos 1 mayúscula (A-Z)" },
-  minuscula: { test: (p) => /[a-z]/.test(p), label: "Al menos 1 minúscula (a-z)" },
+  mayuscula: {
+    test: (p) => /[A-Z]/.test(p),
+    label: "Al menos 1 mayúscula (A-Z)",
+  },
+  minuscula: {
+    test: (p) => /[a-z]/.test(p),
+    label: "Al menos 1 minúscula (a-z)",
+  },
   numero: { test: (p) => /[0-9]/.test(p), label: "Al menos 1 número (0-9)" },
-  especial: { test: (p) => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(p), label: "Al menos 1 carácter especial (!@#$%^&*)" },
+  especial: {
+    test: (p) => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(p),
+    label: "Al menos 1 carácter especial (!@#$%^&*)",
+  },
 };
 
 function evaluarFortalezaContraseña(password) {
-  const cumplidos = Object.values(CRITERIOS_CONTRASEÑA).filter(c => c.test(password)).length;
-  
-  if (cumplidos <= 2) return { nivel: "débil", porcentaje: 33, color: "#e53e3e" };
-  if (cumplidos <= 4) return { nivel: "segura", porcentaje: 66, color: "#90ee90" };
-  return { nivel: "muy segura", porcentaje: 100, color: "#228B22" };
+  const cumplidos = Object.values(CRITERIOS_CONTRASEÑA).filter((c) =>
+    c.test(password),
+  ).length;
+  const totalCriterios = Object.keys(CRITERIOS_CONTRASEÑA).length;
+
+  // Lógica más estricta: requiere TODOS los criterios
+  if (cumplidos < totalCriterios) {
+    // No segura: falta al menos un criterio
+    return { nivel: "no segura", porcentaje: 33, color: "#e53e3e" };
+  }
+
+  // Muy segura: todos los criterios + 12+ caracteres
+  if (password.length >= 12) {
+    return { nivel: "muy segura", porcentaje: 100, color: "#228B22" };
+  }
+
+  // Segura: todos los criterios pero menos de 12 caracteres
+  return { nivel: "segura", porcentaje: 66, color: "#90ee90" };
 }
 
 export default function PaginaRegister() {
@@ -24,7 +46,7 @@ export default function PaginaRegister() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ nombre: "", email: "", password: "" });
   const fortaleza = evaluarFortalezaContraseña(form.password);
-  const puedeEnviar = form.nombre && form.email && fortaleza.nivel !== "débil";
+  const puedeEnviar = form.nombre && form.email && fortaleza.nivel !== "no segura";
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -63,7 +85,7 @@ export default function PaginaRegister() {
             style={estilos.input}
             required
           />
-          
+
           {/* Contraseña con validación fuerte */}
           <div style={estilos.contenedorContraseña}>
             <input
@@ -75,11 +97,11 @@ export default function PaginaRegister() {
               style={estilos.input}
               required
             />
-            
+
             {/* Barra de fortaleza */}
             {form.password && (
               <div style={estilos.barraContenedor}>
-                <div 
+                <div
                   style={{
                     ...estilos.barraFondo,
                     backgroundColor: fortaleza.color,
@@ -88,14 +110,14 @@ export default function PaginaRegister() {
                 />
               </div>
             )}
-            
+
             {/* Etiqueta de fortaleza */}
             {form.password && (
               <p style={{ ...estilos.nivelFortaleza, color: fortaleza.color }}>
                 Fortaleza: <strong>{fortaleza.nivel.toUpperCase()}</strong>
               </p>
             )}
-            
+
             {/* Lista de criterios */}
             {form.password && (
               <div style={estilos.criterios}>
@@ -103,27 +125,36 @@ export default function PaginaRegister() {
                   const cumple = criterio.test(form.password);
                   return (
                     <div key={key} style={estilos.criterio}>
-                      <span style={{color: cumple ? "#228B22" : "#ccc"}}>
+                      <span style={{ color: cumple ? "#228B22" : "#ccc" }}>
                         {cumple ? "✓" : "○"}
                       </span>
-                      <span style={{color: cumple ? "#333" : "#bbb"}}>
+                      <span style={{ color: cumple ? "#333" : "#bbb" }}>
                         {criterio.label}
                       </span>
                     </div>
                   );
                 })}
+                {/* Requisito adicional para "muy segura" */}
+                <div style={estilos.criterio}>
+                  <span style={{ color: form.password.length >= 12 ? "#228B22" : "#ccc" }}>
+                    {form.password.length >= 12 ? "✓" : "○"}
+                  </span>
+                  <span style={{ color: form.password.length >= 12 ? "#333" : "#bbb" }}>
+                    Mínimo 12 caracteres (para "MUY SEGURA")
+                  </span>
+                </div>
               </div>
             )}
           </div>
-          
+
           {error && <p style={estilos.error}>{error}</p>}
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             style={{
               ...estilos.boton,
               opacity: puedeEnviar ? 1 : 0.5,
               cursor: puedeEnviar ? "pointer" : "not-allowed",
-            }} 
+            }}
             disabled={!puedeEnviar || cargando}
           >
             {cargando ? "Creando cuenta..." : "Crear cuenta"}
