@@ -2,10 +2,29 @@ import { useState } from "react";
 import { useAuth } from "./useAuth";
 import { useNavigate, Link } from "react-router-dom";
 
+// Criterios de validación de contraseña
+const CRITERIOS_CONTRASEÑA = {
+  minimo: { test: (p) => p.length >= 6, label: "Mínimo 6 caracteres" },
+  mayuscula: { test: (p) => /[A-Z]/.test(p), label: "Al menos 1 mayúscula (A-Z)" },
+  minuscula: { test: (p) => /[a-z]/.test(p), label: "Al menos 1 minúscula (a-z)" },
+  numero: { test: (p) => /[0-9]/.test(p), label: "Al menos 1 número (0-9)" },
+  especial: { test: (p) => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(p), label: "Al menos 1 carácter especial (!@#$%^&*)" },
+};
+
+function evaluarFortalezaContraseña(password) {
+  const cumplidos = Object.values(CRITERIOS_CONTRASEÑA).filter(c => c.test(password)).length;
+  
+  if (cumplidos <= 2) return { nivel: "débil", porcentaje: 33, color: "#e53e3e" };
+  if (cumplidos <= 4) return { nivel: "segura", porcentaje: 66, color: "#90ee90" };
+  return { nivel: "muy segura", porcentaje: 100, color: "#228B22" };
+}
+
 export default function PaginaRegister() {
   const { register, cargando, error } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ nombre: "", email: "", password: "" });
+  const fortaleza = evaluarFortalezaContraseña(form.password);
+  const puedeEnviar = form.nombre && form.email && fortaleza.nivel !== "débil";
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -13,6 +32,8 @@ export default function PaginaRegister() {
 
   async function handleSubmit(e) {
     e.preventDefault();
+    // Guardar nombre en sessionStorage para /completar
+    sessionStorage.setItem("nombreRegistro", form.nombre);
     const resultado = await register(form);
     if (resultado) navigate("/perfil/completar");
   }
@@ -42,18 +63,69 @@ export default function PaginaRegister() {
             style={estilos.input}
             required
           />
-          <input
-            name="password"
-            type="password"
-            placeholder="Contraseña (mínimo 6 caracteres)"
-            value={form.password}
-            onChange={handleChange}
-            style={estilos.input}
-            required
-            minLength={6}
-          />
+          
+          {/* Contraseña con validación fuerte */}
+          <div style={estilos.contenedorContraseña}>
+            <input
+              name="password"
+              type="password"
+              placeholder="Contraseña segura"
+              value={form.password}
+              onChange={handleChange}
+              style={estilos.input}
+              required
+            />
+            
+            {/* Barra de fortaleza */}
+            {form.password && (
+              <div style={estilos.barraContenedor}>
+                <div 
+                  style={{
+                    ...estilos.barraFondo,
+                    backgroundColor: fortaleza.color,
+                    width: `${fortaleza.porcentaje}%`,
+                  }}
+                />
+              </div>
+            )}
+            
+            {/* Etiqueta de fortaleza */}
+            {form.password && (
+              <p style={{ ...estilos.nivelFortaleza, color: fortaleza.color }}>
+                Fortaleza: <strong>{fortaleza.nivel.toUpperCase()}</strong>
+              </p>
+            )}
+            
+            {/* Lista de criterios */}
+            {form.password && (
+              <div style={estilos.criterios}>
+                {Object.entries(CRITERIOS_CONTRASEÑA).map(([key, criterio]) => {
+                  const cumple = criterio.test(form.password);
+                  return (
+                    <div key={key} style={estilos.criterio}>
+                      <span style={{color: cumple ? "#228B22" : "#ccc"}}>
+                        {cumple ? "✓" : "○"}
+                      </span>
+                      <span style={{color: cumple ? "#333" : "#bbb"}}>
+                        {criterio.label}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+          
           {error && <p style={estilos.error}>{error}</p>}
-          <button type="submit" style={estilos.boton} disabled={cargando}>
+          <button 
+            type="submit" 
+            style={{
+              ...estilos.boton,
+              opacity: puedeEnviar ? 1 : 0.5,
+              cursor: puedeEnviar ? "pointer" : "not-allowed",
+            }} 
+            disabled={!puedeEnviar || cargando}
+          >
             {cargando ? "Creando cuenta..." : "Crear cuenta"}
           </button>
         </form>
@@ -106,6 +178,42 @@ const estilos = {
     fontSize: "0.95rem",
     outline: "none",
   },
+  contenedorContraseña: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+  },
+  barraContenedor: {
+    width: "100%",
+    height: "6px",
+    backgroundColor: "#e0e0e0",
+    borderRadius: "3px",
+    overflow: "hidden",
+  },
+  barraFondo: {
+    height: "100%",
+    transition: "all 0.3s ease",
+    borderRadius: "3px",
+  },
+  nivelFortaleza: {
+    fontSize: "0.8rem",
+    margin: "4px 0",
+    fontWeight: "500",
+  },
+  criterios: {
+    fontSize: "0.75rem",
+    backgroundColor: "#f9f9f9",
+    padding: "8px 12px",
+    borderRadius: "6px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "6px",
+  },
+  criterio: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+  },
   boton: {
     padding: "12px",
     borderRadius: "8px",
@@ -116,6 +224,7 @@ const estilos = {
     border: "none",
     cursor: "pointer",
     marginTop: "8px",
+    transition: "opacity 0.2s",
   },
   error: { color: "#e53e3e", fontSize: "0.85rem", margin: "0" },
   link: {
