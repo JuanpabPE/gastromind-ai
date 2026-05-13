@@ -26,18 +26,17 @@ function evaluarFortalezaContraseña(password) {
   ).length;
   const totalCriterios = Object.keys(CRITERIOS_CONTRASEÑA).length;
 
-  // Lógica más estricta: requiere TODOS los criterios
+  // NO SEGURA: falta al menos un criterio
   if (cumplidos < totalCriterios) {
-    // No segura: falta al menos un criterio
     return { nivel: "no segura", porcentaje: 33, color: "#e53e3e" };
   }
 
-  // Muy segura: todos los criterios + 12+ caracteres
-  if (password.length >= 12) {
+  // MUY SEGURA: todos los criterios + 10+ caracteres (silencioso, no mostrar en UI)
+  if (password.length >= 10) {
     return { nivel: "muy segura", porcentaje: 100, color: "#228B22" };
   }
 
-  // Segura: todos los criterios pero menos de 12 caracteres
+  // SEGURA: todos los criterios (6-9 caracteres)
   return { nivel: "segura", porcentaje: 66, color: "#90ee90" };
 }
 
@@ -134,15 +133,6 @@ export default function PaginaRegister() {
                     </div>
                   );
                 })}
-                {/* Requisito adicional para "muy segura" */}
-                <div style={estilos.criterio}>
-                  <span style={{ color: form.password.length >= 12 ? "#228B22" : "#ccc" }}>
-                    {form.password.length >= 12 ? "✓" : "○"}
-                  </span>
-                  <span style={{ color: form.password.length >= 12 ? "#333" : "#bbb" }}>
-                    Mínimo 12 caracteres (para "MUY SEGURA")
-                  </span>
-                </div>
               </div>
             )}
           </div>
