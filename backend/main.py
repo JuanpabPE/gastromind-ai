@@ -8,6 +8,7 @@ from alertas_alergenos.router import router as alertas_router
 from recomendaciones.router import router as recomendaciones_router
 from chatbot_nutricionista.router import router as chatbot_router
 from historial_consumo.router import router as historial_router
+from pedidos.router import router as pedidos_router
 
 app = FastAPI(title="GastroMind AI", version="1.0.0")
 
@@ -41,6 +42,7 @@ app.include_router(alertas_router)
 app.include_router(recomendaciones_router)
 app.include_router(chatbot_router)
 app.include_router(historial_router)
+app.include_router(pedidos_router)
 
 @app.get("/")
 def root():

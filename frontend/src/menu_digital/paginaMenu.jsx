@@ -13,6 +13,7 @@ export default function PaginaMenu() {
   const { platos, cargando, filtros, setFiltros, tieneAlergeno } = useMenu();
   const [platoSeleccionado, setPlatoSeleccionado] = useState(null);
   const [esAdmin, setEsAdmin] = useState(false);
+  const [esMozo, setEsMozo] = useState(false);
   const categoriaActual = filtros.categoria || "Todos los platos";
   const platosPorCategoria = filtros.categoria
     ? platos
@@ -27,11 +28,12 @@ export default function PaginaMenu() {
 
       const { data } = await supabase
         .from("perfiles")
-        .select("es_admin")
+        .select("es_admin, es_mozo")
         .eq("usuario_id", user.id)
         .single();
 
       setEsAdmin(data?.es_admin || false);
+      setEsMozo(data?.es_mozo || false);
     }
     verificar();
   }, []);
@@ -76,6 +78,22 @@ export default function PaginaMenu() {
               }}
             >
               📈 Admin
+            </button>
+          )}
+          {esMozo && (
+            <button
+              onClick={() => navigate("/mozo")}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "8px",
+                backgroundColor: "#4299e1",
+                color: "#fff",
+                border: "none",
+                cursor: "pointer",
+                fontWeight: "600",
+              }}
+            >
+              🍽️ Panel mozo
             </button>
           )}
         </div>
