@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useAuth } from "./useAuth";
 import { useNavigate, Link } from "react-router-dom";
+import logoTanta from "../assets/images/logo_tanta.png";
 
 export default function PaginaLogin() {
   const { login, cargando, error } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
+  const puedeEnviar = form.email && form.password;
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -20,30 +22,49 @@ export default function PaginaLogin() {
   return (
     <div style={estilos.pagina}>
       <div style={estilos.tarjeta}>
-        <h1 style={estilos.titulo}>GastroMind AI</h1>
-        <p style={estilos.subtitulo}>Bienvenido a Tanta</p>
+        {/* Logo TANTA en esquina superior izquierda */}
+        <img src={logoTanta} alt="TANTA Logo" style={estilos.logo} />
+
+        <h1 style={estilos.titulo}>Bienvenido de nuevo</h1>
+        <p style={estilos.subtitulo}>a TANTA Restaurante</p>
 
         <form onSubmit={handleSubmit} style={estilos.form}>
-          <input
-            name="email"
-            type="email"
-            placeholder="Correo electrónico"
-            value={form.email}
-            onChange={handleChange}
-            style={estilos.input}
-            required
-          />
-          <input
-            name="password"
-            type="password"
-            placeholder="Contraseña"
-            value={form.password}
-            onChange={handleChange}
-            style={estilos.input}
-            required
-          />
+          <div style={estilos.contenedor}>
+            <label style={estilos.labelTexto}>Correo electrónico</label>
+            <input
+              name="email"
+              type="email"
+              placeholder="tu@correo.com"
+              value={form.email}
+              onChange={handleChange}
+              style={estilos.input}
+              required
+            />
+          </div>
+
+          <div style={estilos.contenedor}>
+            <label style={estilos.labelTexto}>Contraseña</label>
+            <input
+              name="password"
+              type="password"
+              placeholder="Tu contraseña"
+              value={form.password}
+              onChange={handleChange}
+              style={estilos.input}
+              required
+            />
+          </div>
+
           {error && <p style={estilos.error}>{error}</p>}
-          <button type="submit" style={estilos.boton} disabled={cargando}>
+          <button 
+            type="submit" 
+            style={{
+              ...estilos.boton,
+              opacity: puedeEnviar ? 1 : 0.5,
+              cursor: puedeEnviar ? "pointer" : "not-allowed",
+            }}
+            disabled={!puedeEnviar || cargando}
+          >
             {cargando ? "Ingresando..." : "Ingresar"}
           </button>
         </form>
@@ -65,54 +86,93 @@ const estilos = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#f5f0eb",
+    backgroundColor: "#F5F0E8",
+    fontFamily: "'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
   },
   tarjeta: {
     backgroundColor: "#ffffff",
     padding: "2.5rem",
     borderRadius: "16px",
     width: "100%",
-    maxWidth: "400px",
-    boxShadow: "0 4px 24px rgba(0,0,0,0.08)",
+    maxWidth: "420px",
+    boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+    position: "relative",
+  },
+  logo: {
+    width: "60px",
+    height: "auto",
+    marginBottom: "1.5rem",
+    objectFit: "contain",
   },
   titulo: {
-    fontSize: "1.8rem",
+    fontSize: "1.6rem",
     fontWeight: "700",
-    color: "#1a1a1a",
+    color: "#8B2E3B",
     margin: "0 0 4px",
-    textAlign: "center",
+    textAlign: "left",
+    fontFamily: "'Montserrat', sans-serif",
   },
   subtitulo: {
     fontSize: "0.95rem",
-    color: "#888",
-    textAlign: "center",
+    color: "#E91E63",
+    textAlign: "left",
     marginBottom: "2rem",
+    fontWeight: "600",
   },
-  form: { display: "flex", flexDirection: "column", gap: "12px" },
+  form: { display: "flex", flexDirection: "column", gap: "14px" },
+  contenedor: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "6px",
+  },
+  labelTexto: {
+    fontSize: "0.85rem",
+    fontWeight: "600",
+    color: "#333",
+    display: "block",
+  },
   input: {
-    padding: "12px 16px",
+    padding: "12px 14px",
     borderRadius: "8px",
-    border: "1px solid #e0e0e0",
+    border: "2px solid #E0E0E0",
     fontSize: "0.95rem",
     outline: "none",
+    fontFamily: "'Montserrat', sans-serif",
+    transition: "border-color 0.2s",
   },
   boton: {
-    padding: "12px",
+    padding: "12px 16px",
     borderRadius: "8px",
-    backgroundColor: "#c8a96e",
+    backgroundColor: "#E91E63",
     color: "#fff",
-    fontWeight: "600",
+    fontWeight: "700",
     fontSize: "1rem",
     border: "none",
     cursor: "pointer",
-    marginTop: "8px",
+    marginTop: "12px",
+    transition: "all 0.3s",
+    fontFamily: "'Montserrat', sans-serif",
   },
-  error: { color: "#e53e3e", fontSize: "0.85rem", margin: "0" },
+  error: { 
+    color: "#E91E63", 
+    fontSize: "0.85rem",
+    padding: "8px",
+    backgroundColor: "#FFE6F0",
+    borderRadius: "4px",
+    fontWeight: "500",
+    margin: "0",
+  },
   link: {
     textAlign: "center",
     marginTop: "1.5rem",
     fontSize: "0.9rem",
-    color: "#888",
+    color: "#666",
+    fontFamily: "'Montserrat', sans-serif",
   },
-  linkTexto: { color: "#c8a96e", fontWeight: "600", textDecoration: "none" },
+  linkTexto: { 
+    color: "#E91E63", 
+    fontWeight: "700", 
+    textDecoration: "none",
+    transition: "opacity 0.2s",
+  },
 };
