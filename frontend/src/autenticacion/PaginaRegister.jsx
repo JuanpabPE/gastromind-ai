@@ -63,6 +63,7 @@ export default function PaginaRegister() {
   const [mostrarPassword, setMostrarPassword] = useState(false);
   const [mostrarConfirmPassword, setMostrarConfirmPassword] = useState(false);
   const [mostrarTooltipSugerencia, setMostrarTooltipSugerencia] = useState(false);
+  const [contraseñaSugerida, setContraseñaSugerida] = useState("");
 
   const fortaleza = evaluarFortalezaContraseña(form.password);
   const contraseñasCoinciden = form.password === form.confirmPassword && form.password !== "";
@@ -73,9 +74,24 @@ export default function PaginaRegister() {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  function mostrarSugerencia() {
-    const sugerida = generarContraseñaAleatoria();
-    setForm({ ...form, password: sugerida, confirmPassword: sugerida });
+  function toggleSugerencia() {
+    if (!mostrarTooltipSugerencia) {
+      // Mostrar sugerencia
+      const sugerida = generarContraseñaAleatoria();
+      setContraseñaSugerida(sugerida);
+      setMostrarTooltipSugerencia(true);
+    } else {
+      // Ocultar sugerencia
+      setMostrarTooltipSugerencia(false);
+    }
+  }
+
+  function aplicarSugerencia() {
+    setForm(prevForm => ({
+      ...prevForm,
+      password: contraseñaSugerida,
+      confirmPassword: contraseñaSugerida,
+    }));
     setMostrarTooltipSugerencia(false);
   }
 
@@ -129,32 +145,24 @@ export default function PaginaRegister() {
 
           {/* Contraseña con validación fuerte y tooltip de sugerencia */}
           <div style={estilos.contenedor}>
-            <div
-              style={estilos.labelConTooltip}
-              onMouseEnter={() => {
-                if (!mostrarTooltipSugerencia) {
-                  mostrarSugerencia();
-                  setMostrarTooltipSugerencia(true);
-                }
-              }}
-              onMouseLeave={() => setMostrarTooltipSugerencia(false)}
-            >
+            <div style={estilos.labelConTooltip}>
               <label style={estilos.labelTexto}>Contraseña</label>
               <div style={estilos.contenedorTooltip}>
                 <button
                   type="button"
+                  onClick={toggleSugerencia}
                   style={estilos.botonTooltip}
-                  title="Ver sugerencia de contraseña"
+                  title="Generar sugerencia de contraseña"
                 >
                   💡
                 </button>
                 {mostrarTooltipSugerencia && (
                   <div style={estilos.tooltip}>
                     <div style={estilos.tooltipContenido}>
-                      <p style={estilos.tooltipTexto}>{form.password}</p>
+                      <p style={estilos.tooltipTexto}>{contraseñaSugerida}</p>
                       <button
                         type="button"
-                        onClick={() => setMostrarTooltipSugerencia(false)}
+                        onClick={aplicarSugerencia}
                         style={estilos.botonAplicar}
                       >
                         ✓ Usar esta
@@ -308,13 +316,11 @@ const estilos = {
     zIndex: 10,
   },
   tarjeta: {
-    backgroundColor: "#ffffff",
-    padding: "3rem 2.5rem",
-    borderRadius: "12px",
+    backgroundColor: "#FAFBFC",
+    padding: "3.5rem 2.5rem",
+    borderRadius: "20px",
     width: "100%",
     maxWidth: "420px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-    border: "1px solid #f0f0f0",
     position: "relative",
   },
   titulo: {
@@ -345,9 +351,9 @@ const estilos = {
     gap: "8px",
   },
   input: {
-    padding: "12px 14px",
-    borderRadius: "8px",
-    border: "1px solid #E5E5E5",
+    padding: "13px 14px",
+    borderRadius: "10px",
+    border: "1.5px solid #E0E0E0",
     fontSize: "0.95rem",
     outline: "none",
     fontFamily: "'Montserrat', sans-serif",
@@ -422,9 +428,9 @@ const estilos = {
     alignItems: "center",
   },
   inputContrasena: {
-    padding: "12px 45px 12px 14px",
-    borderRadius: "8px",
-    border: "1px solid #E5E5E5",
+    padding: "13px 45px 13px 14px",
+    borderRadius: "10px",
+    border: "1.5px solid #E0E0E0",
     fontSize: "0.95rem",
     outline: "none",
     fontFamily: "'Montserrat', sans-serif",
@@ -489,18 +495,18 @@ const estilos = {
     fontWeight: "500",
   },
   boton: {
-    padding: "12px 16px",
-    borderRadius: "8px",
+    padding: "13px 18px",
+    borderRadius: "10px",
     backgroundColor: "#E91E63",
     color: "#fff",
     fontWeight: "700",
-    fontSize: "0.95rem",
+    fontSize: "1rem",
     border: "none",
     cursor: "pointer",
-    marginTop: "20px",
+    marginTop: "24px",
     transition: "all 0.25s ease",
     fontFamily: "'Montserrat', sans-serif",
-    boxShadow: "0 2px 6px rgba(233, 30, 99, 0.2)",
+    boxShadow: "0 4px 12px rgba(233, 30, 99, 0.25)",
   },
   error: {
     color: "#E91E63",
