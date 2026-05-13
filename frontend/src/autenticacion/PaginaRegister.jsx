@@ -54,8 +54,17 @@ function evaluarFortalezaContraseña(password) {
 export default function PaginaRegister() {
   const { register, cargando, error } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ nombre: "", email: "", password: "", confirmPassword: "" });
-  const [mostrarSugerencia, setMostrarSugerencia] = useState(false);
+  const [form, setForm] = useState({
+    nombre: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [mostrarPassword, setMostrarPassword] = useState(false);
+  const [mostrarConfirmPassword, setMostrarConfirmPassword] = useState(false);
+  const [mostrarTooltip, setMostrarTooltip] = useState(false);
+  const [sugerenciaTexto, setSugerenciaTexto] = useState("");
+
   const fortaleza = evaluarFortalezaContraseña(form.password);
   const contraseñasCoinciden = form.password === form.confirmPassword && form.password !== "";
   const puedeEnviar =
@@ -65,9 +74,15 @@ export default function PaginaRegister() {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  function aplicarSugerencia() {
+  function mostrarSugerencia() {
     const sugerida = generarContraseñaAleatoria();
-    setForm({ ...form, password: sugerida, confirmPassword: sugerida });
+    setSugerenciaTexto(sugerida);
+    setMostrarTooltip(true);
+  }
+
+  function aplicarSugerencia() {
+    setForm({ ...form, password: sugerenciaTexto, confirmPassword: sugerenciaTexto });
+    setMostrarTooltip(false);
   }
 
   async function handleSubmit(e) {
@@ -84,61 +99,90 @@ export default function PaginaRegister() {
 
   return (
     <div style={estilos.pagina}>
-      <div style={estilos.tarjeta}>
-        {/* Logo TANTA en esquina superior izquierda */}
-        <img src={logoTanta} alt="TANTA Logo" style={estilos.logo} />
+      {/* Logo TANTA afuera del formulario, esquina superior izquierda */}
+      <img src={logoTanta} alt="TANTA Logo" style={estilos.logoExterno} />
 
+      <div style={estilos.tarjeta}>
         <h1 style={estilos.titulo}>Crea tu cuenta</h1>
-        <p style={estilos.subtitulo}>en TANTA Restaurante</p>
+        <p style={estilos.subtitulo}>en <span style={estilos.spanTanta}>TANTA Restaurante</span></p>
 
         <form onSubmit={handleSubmit} style={estilos.form}>
-          <input
-            name="nombre"
-            type="text"
-            placeholder="Nombre completo"
-            value={form.nombre}
-            onChange={handleChange}
-            style={estilos.input}
-            required
-          />
-          <input
-            name="email"
-            type="email"
-            placeholder="Correo electrónico"
-            value={form.email}
-            onChange={handleChange}
-            style={estilos.input}
-            required
-          />
-
-          {/* Contraseña con validación fuerte y sugerencia */}
-          <div style={estilos.contenedorContraseña}>
-            <div style={estilos.labelConBotón}>
-              <label style={estilos.labelTexto}>Contraseña</label>
-              <button
-                type="button"
-                onMouseEnter={() => setMostrarSugerencia(true)}
-                onMouseLeave={() => setMostrarSugerencia(false)}
-                onClick={aplicarSugerencia}
-                title="Generar contraseña segura"
-                style={{
-                  ...estilos.botonSugerencia,
-                  opacity: mostrarSugerencia ? 1 : 0.4,
-                }}
-              >
-                ⚠️
-              </button>
-            </div>
-
+          <div style={estilos.contenedor}>
+            <label style={estilos.labelTexto}>Nombre completo</label>
             <input
-              name="password"
-              type="password"
-              placeholder="Contraseña segura"
-              value={form.password}
+              name="nombre"
+              type="text"
+              placeholder="Tu nombre"
+              value={form.nombre}
               onChange={handleChange}
               style={estilos.input}
               required
             />
+          </div>
+
+          <div style={estilos.contenedor}>
+            <label style={estilos.labelTexto}>Correo electrónico</label>
+            <input
+              name="email"
+              type="email"
+              placeholder="tu@correo.com"
+              value={form.email}
+              onChange={handleChange}
+              style={estilos.input}
+              required
+            />
+          </div>
+
+          {/* Contraseña con validación fuerte y tooltip de sugerencia */}
+          <div style={estilos.contenedor}>
+            <div style={estilos.labelConTooltip}>
+              <label style={estilos.labelTexto}>Contraseña</label>
+              <div style={estilos.contenedorTooltip}>
+                <button
+                  type="button"
+                  onMouseEnter={mostrarSugerencia}
+                  onMouseLeave={() => setMostrarTooltip(false)}
+                  style={estilos.botonTooltip}
+                  title="Ver sugerencia de contraseña"
+                >
+                  💡
+                </button>
+                {mostrarTooltip && (
+                  <div style={estilos.tooltip}>
+                    <div style={estilos.tooltipContenido}>
+                      <p style={estilos.tooltipTexto}>{sugerenciaTexto}</p>
+                      <button
+                        type="button"
+                        onClick={aplicarSugerencia}
+                        style={estilos.botonAplicar}
+                      >
+                        Usar esta
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div style={estilos.contenedorContrasena}>
+              <input
+                name="password"
+                type={mostrarPassword ? "text" : "password"}
+                placeholder="Tu contraseña segura"
+                value={form.password}
+                onChange={handleChange}
+                style={estilos.inputContrasena}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setMostrarPassword(!mostrarPassword)}
+                style={estilos.botonOjo}
+                title={mostrarPassword ? "Ocultar" : "Mostrar"}
+              >
+                {mostrarPassword ? "👁️" : "👁️‍🗨️"}
+              </button>
+            </div>
 
             {/* Barra de fortaleza */}
             {form.password && (
@@ -181,25 +225,39 @@ export default function PaginaRegister() {
           </div>
 
           {/* Repetir Contraseña */}
-          <div style={estilos.contenedorContraseña}>
+          <div style={estilos.contenedor}>
             <label style={estilos.labelTexto}>Repetir contraseña</label>
-            <input
-              name="confirmPassword"
-              type="password"
-              placeholder="Confirma tu contraseña"
-              value={form.confirmPassword}
-              onChange={handleChange}
-              style={{
-                ...estilos.input,
-                borderColor: form.confirmPassword && !contraseñasCoinciden ? "#E91E63" : "inherit",
-              }}
-              required
-            />
+            <div style={estilos.contenedorContrasena}>
+              <input
+                name="confirmPassword"
+                type={mostrarConfirmPassword ? "text" : "password"}
+                placeholder="Confirma tu contraseña"
+                value={form.confirmPassword}
+                onChange={handleChange}
+                style={{
+                  ...estilos.inputContrasena,
+                  borderColor:
+                    form.confirmPassword && !contraseñasCoinciden
+                      ? "#E91E63"
+                      : "inherit",
+                }}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setMostrarConfirmPassword(!mostrarConfirmPassword)}
+                style={estilos.botonOjo}
+                title={mostrarConfirmPassword ? "Ocultar" : "Mostrar"}
+              >
+                {mostrarConfirmPassword ? "👁️" : "👁️‍🗨️"}
+              </button>
+            </div>
+
             {form.confirmPassword && !contraseñasCoinciden && (
-              <p style={estilos.errorValidación}>Las contraseñas no coinciden</p>
+              <p style={estilos.errorValidacion}>Las contraseñas no coinciden</p>
             )}
             {contraseñasCoinciden && (
-              <p style={estilos.exitoValidación}>✓ Contraseñas coinciden</p>
+              <p style={estilos.exitoValidacion}>✓ Contraseñas coinciden</p>
             )}
           </div>
 
@@ -220,7 +278,7 @@ export default function PaginaRegister() {
         <p style={estilos.link}>
           ¿Ya tienes cuenta?{" "}
           <Link to="/login" style={estilos.linkTexto}>
-            Inicia sesión
+            Inicia sesión aquí
           </Link>
         </p>
       </div>
@@ -234,79 +292,159 @@ const estilos = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#F5F0E8",
+    background: "linear-gradient(135deg, #F5F0E8 0%, #EAE1D5 100%)",
     fontFamily: "'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    position: "relative",
+    overflow: "hidden",
+  },
+  logoExterno: {
+    position: "fixed",
+    top: "2rem",
+    left: "2rem",
+    width: "70px",
+    height: "auto",
+    objectFit: "contain",
+    zIndex: 10,
   },
   tarjeta: {
     backgroundColor: "#ffffff",
-    padding: "2.5rem",
-    borderRadius: "16px",
+    padding: "3rem 2.5rem",
+    borderRadius: "20px",
     width: "100%",
     maxWidth: "420px",
-    boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+    boxShadow: "0 16px 48px rgba(0,0,0,0.12)",
     position: "relative",
   },
-  logo: {
-    width: "60px",
-    height: "auto",
-    marginBottom: "1.5rem",
-    objectFit: "contain",
-  },
   titulo: {
-    fontSize: "1.6rem",
+    fontSize: "1.8rem",
     fontWeight: "700",
     color: "#8B2E3B",
-    margin: "0 0 4px",
-    textAlign: "left",
+    margin: "0 0 8px",
+    textAlign: "center",
     fontFamily: "'Montserrat', sans-serif",
+    letterSpacing: "-0.5px",
   },
   subtitulo: {
-    fontSize: "0.95rem",
+    fontSize: "1.05rem",
+    color: "#666",
+    textAlign: "center",
+    marginBottom: "2.5rem",
+    fontWeight: "500",
+  },
+  spanTanta: {
     color: "#E91E63",
-    textAlign: "left",
-    marginBottom: "2rem",
-    fontWeight: "600",
+    fontWeight: "700",
+    fontSize: "1.15rem",
   },
-  form: { display: "flex", flexDirection: "column", gap: "14px" },
-  input: {
-    padding: "12px 14px",
-    borderRadius: "8px",
-    border: "2px solid #E0E0E0",
-    fontSize: "0.95rem",
-    outline: "none",
-    fontFamily: "'Montserrat', sans-serif",
-    transition: "border-color 0.2s",
-  },
-  labelTexto: {
-    fontSize: "0.85rem",
-    fontWeight: "600",
-    color: "#333",
-    display: "block",
-    marginBottom: "4px",
-  },
-  labelConBotón: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "4px",
-  },
-  botonSugerencia: {
-    background: "none",
-    border: "none",
-    fontSize: "1.2rem",
-    cursor: "pointer",
-    padding: "0",
-    transition: "opacity 0.2s",
-  },
-  contenedorContraseña: {
+  form: { display: "flex", flexDirection: "column", gap: "18px" },
+  contenedor: {
     display: "flex",
     flexDirection: "column",
     gap: "8px",
   },
+  input: {
+    padding: "13px 14px",
+    borderRadius: "10px",
+    border: "2px solid #E8E8E8",
+    fontSize: "0.95rem",
+    outline: "none",
+    fontFamily: "'Montserrat', sans-serif",
+    transition: "all 0.3s ease",
+    backgroundColor: "#FAFAFA",
+  },
+  labelTexto: {
+    fontSize: "0.9rem",
+    fontWeight: "600",
+    color: "#333",
+    display: "block",
+    marginBottom: "2px",
+  },
+  labelConTooltip: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  contenedorTooltip: {
+    position: "relative",
+  },
+  botonTooltip: {
+    background: "none",
+    border: "none",
+    fontSize: "1.1rem",
+    cursor: "pointer",
+    padding: "2px 6px",
+    opacity: 0.6,
+    transition: "opacity 0.2s",
+  },
+  tooltip: {
+    position: "absolute",
+    top: "-120px",
+    right: "-30px",
+    zIndex: 100,
+    backgroundColor: "#8B2E3B",
+    color: "#fff",
+    padding: "0",
+    borderRadius: "10px",
+    minWidth: "280px",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+    fontSize: "0.85rem",
+  },
+  tooltipContenido: {
+    padding: "12px 14px",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "10px",
+  },
+  tooltipTexto: {
+    margin: "0",
+    fontSize: "0.95rem",
+    fontWeight: "700",
+    fontFamily: "monospace",
+    wordBreak: "break-all",
+  },
+  botonAplicar: {
+    backgroundColor: "#E91E63",
+    color: "#fff",
+    border: "none",
+    padding: "6px 16px",
+    borderRadius: "6px",
+    fontSize: "0.8rem",
+    fontWeight: "600",
+    cursor: "pointer",
+    transition: "all 0.2s",
+  },
+  contenedorContrasena: {
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+  },
+  inputContrasena: {
+    padding: "13px 45px 13px 14px",
+    borderRadius: "10px",
+    border: "2px solid #E8E8E8",
+    fontSize: "0.95rem",
+    outline: "none",
+    fontFamily: "'Montserrat', sans-serif",
+    transition: "all 0.3s ease",
+    backgroundColor: "#FAFAFA",
+    width: "100%",
+  },
+  botonOjo: {
+    position: "absolute",
+    right: "12px",
+    border: "none",
+    backgroundColor: "transparent",
+    cursor: "pointer",
+    fontSize: "1.1rem",
+    opacity: 0.6,
+    transition: "opacity 0.2s",
+    padding: "4px",
+  },
   barraContenedor: {
     width: "100%",
     height: "6px",
-    backgroundColor: "#E0E0E0",
+    backgroundColor: "#E8E8E8",
     borderRadius: "3px",
     overflow: "hidden",
   },
@@ -317,15 +455,15 @@ const estilos = {
   },
   nivelFortaleza: {
     fontSize: "0.8rem",
-    margin: "4px 0",
+    margin: "4px 0 0",
     fontWeight: "600",
     color: "#E91E63",
   },
   criterios: {
     fontSize: "0.75rem",
     backgroundColor: "#FFF3E0",
-    padding: "8px 12px",
-    borderRadius: "6px",
+    padding: "10px 12px",
+    borderRadius: "8px",
     display: "flex",
     flexDirection: "column",
     gap: "6px",
@@ -336,39 +474,41 @@ const estilos = {
     alignItems: "center",
     gap: "8px",
   },
-  errorValidación: {
+  errorValidacion: {
     fontSize: "0.8rem",
     color: "#E91E63",
-    margin: "0",
+    margin: "4px 0 0",
     fontWeight: "500",
   },
-  exitoValidación: {
+  exitoValidacion: {
     fontSize: "0.8rem",
     color: "#4CAF50",
-    margin: "0",
+    margin: "4px 0 0",
     fontWeight: "500",
   },
   boton: {
-    padding: "12px 16px",
-    borderRadius: "8px",
+    padding: "13px 16px",
+    borderRadius: "10px",
     backgroundColor: "#E91E63",
     color: "#fff",
     fontWeight: "700",
     fontSize: "1rem",
     border: "none",
     cursor: "pointer",
-    marginTop: "12px",
-    transition: "all 0.3s",
+    marginTop: "8px",
+    transition: "all 0.3s ease",
     fontFamily: "'Montserrat', sans-serif",
+    boxShadow: "0 4px 12px rgba(233, 30, 99, 0.3)",
   },
-  error: { 
-    color: "#E91E63", 
-    fontSize: "0.85rem", 
-    margin: "0",
-    padding: "8px",
+  error: {
+    color: "#E91E63",
+    fontSize: "0.85rem",
+    padding: "10px",
     backgroundColor: "#FFE6F0",
-    borderRadius: "4px",
+    borderRadius: "6px",
     fontWeight: "500",
+    margin: "0",
+    textAlign: "center",
   },
   link: {
     textAlign: "center",
