@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { useAuth } from "./useAuth";
 import { useNavigate, Link } from "react-router-dom";
+import logoTanta from "../assets/images/logo_tanta.png";
 
 export default function PaginaLogin() {
   const { login, cargando, error } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
+  const [mostrarContraseña, setMostrarContraseña] = useState(false);
+  const puedeEnviar = form.email && form.password;
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -19,31 +22,60 @@ export default function PaginaLogin() {
 
   return (
     <div style={estilos.pagina}>
+      {/* Logo TANTA afuera del formulario, esquina superior izquierda */}
+      <img src={logoTanta} alt="TANTA Logo" style={estilos.logoExterno} />
+
       <div style={estilos.tarjeta}>
-        <h1 style={estilos.titulo}>GastroMind AI</h1>
-        <p style={estilos.subtitulo}>Bienvenido a Tanta</p>
+        <h1 style={estilos.titulo}>Bienvenido de nuevo</h1>
+        <p style={estilos.subtitulo}>a <span style={estilos.spanTanta}>TANTA Restaurante</span></p>
 
         <form onSubmit={handleSubmit} style={estilos.form}>
-          <input
-            name="email"
-            type="email"
-            placeholder="Correo electrónico"
-            value={form.email}
-            onChange={handleChange}
-            style={estilos.input}
-            required
-          />
-          <input
-            name="password"
-            type="password"
-            placeholder="Contraseña"
-            value={form.password}
-            onChange={handleChange}
-            style={estilos.input}
-            required
-          />
+          <div style={estilos.contenedor}>
+            <label style={estilos.labelTexto}>Correo electrónico</label>
+            <input
+              name="email"
+              type="email"
+              placeholder="tu@correo.com"
+              value={form.email}
+              onChange={handleChange}
+              style={estilos.input}
+              required
+            />
+          </div>
+
+          <div style={estilos.contenedor}>
+            <label style={estilos.labelTexto}>Contraseña</label>
+            <div style={estilos.contenedorContraseña}>
+              <input
+                name="password"
+                type={mostrarContraseña ? "text" : "password"}
+                placeholder="Tu contraseña"
+                value={form.password}
+                onChange={handleChange}
+                style={estilos.inputContraseña}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setMostrarContraseña(!mostrarContraseña)}
+                style={estilos.botonOjo}
+                title={mostrarContraseña ? "Ocultar" : "Mostrar"}
+              >
+                {mostrarContraseña ? "👁️" : "👁️‍🗨️"}
+              </button>
+            </div>
+          </div>
+
           {error && <p style={estilos.error}>{error}</p>}
-          <button type="submit" style={estilos.boton} disabled={cargando}>
+          <button 
+            type="submit" 
+            style={{
+              ...estilos.boton,
+              opacity: puedeEnviar ? 1 : 0.5,
+              cursor: puedeEnviar ? "pointer" : "not-allowed",
+            }}
+            disabled={!puedeEnviar || cargando}
+          >
             {cargando ? "Ingresando..." : "Ingresar"}
           </button>
         </form>
@@ -65,54 +97,135 @@ const estilos = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#f5f0eb",
+    background: "linear-gradient(135deg, #F5F0E8 0%, #EAE1D5 100%)",
+    fontFamily: "'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    position: "relative",
+    overflow: "hidden",
+  },
+  logoExterno: {
+    position: "fixed",
+    top: "2rem",
+    left: "2rem",
+    width: "100px",
+    height: "auto",
+    objectFit: "contain",
+    zIndex: 10,
   },
   tarjeta: {
     backgroundColor: "#ffffff",
-    padding: "2.5rem",
-    borderRadius: "16px",
+    padding: "3rem 2.5rem",
+    borderRadius: "12px",
     width: "100%",
-    maxWidth: "400px",
-    boxShadow: "0 4px 24px rgba(0,0,0,0.08)",
+    maxWidth: "420px",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+    border: "1px solid #f0f0f0",
+    position: "relative",
   },
   titulo: {
     fontSize: "1.8rem",
     fontWeight: "700",
-    color: "#1a1a1a",
-    margin: "0 0 4px",
+    color: "#8B2E3B",
+    margin: "0 0 8px",
     textAlign: "center",
+    fontFamily: "'Montserrat', sans-serif",
+    letterSpacing: "-0.5px",
   },
   subtitulo: {
-    fontSize: "0.95rem",
-    color: "#888",
+    fontSize: "1.05rem",
+    color: "#666",
     textAlign: "center",
-    marginBottom: "2rem",
+    marginBottom: "2.5rem",
+    fontWeight: "500",
   },
-  form: { display: "flex", flexDirection: "column", gap: "12px" },
+  spanTanta: {
+    color: "#E91E63",
+    fontWeight: "700",
+    fontSize: "1.15rem",
+  },
+  form: { display: "flex", flexDirection: "column", gap: "14px" },
+  contenedor: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "6px",
+  },
+  labelTexto: {
+    fontSize: "0.9rem",
+    fontWeight: "600",
+    color: "#333",
+    display: "block",
+    marginBottom: "6px",
+  },
   input: {
-    padding: "12px 16px",
+    padding: "12px 14px",
     borderRadius: "8px",
-    border: "1px solid #e0e0e0",
+    border: "1px solid #E5E5E5",
     fontSize: "0.95rem",
     outline: "none",
+    fontFamily: "'Montserrat', sans-serif",
+    transition: "all 0.25s ease",
+    backgroundColor: "#FFFFFF",
+  },
+  contenedorContraseña: {
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+  },
+  inputContraseña: {
+    padding: "12px 45px 12px 14px",
+    borderRadius: "8px",
+    border: "1px solid #E5E5E5",
+    fontSize: "0.95rem",
+    outline: "none",
+    fontFamily: "'Montserrat', sans-serif",
+    transition: "all 0.25s ease",
+    backgroundColor: "#FFFFFF",
+    width: "100%",
+  },
+  botonOjo: {
+    position: "absolute",
+    right: "12px",
+    border: "none",
+    backgroundColor: "transparent",
+    cursor: "pointer",
+    fontSize: "1.2rem",
+    opacity: 0.6,
+    transition: "opacity 0.2s",
+    padding: "4px",
   },
   boton: {
-    padding: "12px",
+    padding: "12px 16px",
     borderRadius: "8px",
-    backgroundColor: "#c8a96e",
+    backgroundColor: "#E91E63",
     color: "#fff",
-    fontWeight: "600",
-    fontSize: "1rem",
+    fontWeight: "700",
+    fontSize: "0.95rem",
     border: "none",
     cursor: "pointer",
-    marginTop: "8px",
+    marginTop: "20px",
+    transition: "all 0.25s ease",
+    fontFamily: "'Montserrat', sans-serif",
+    boxShadow: "0 2px 6px rgba(233, 30, 99, 0.2)",
   },
-  error: { color: "#e53e3e", fontSize: "0.85rem", margin: "0" },
+  error: { 
+    color: "#E91E63", 
+    fontSize: "0.85rem",
+    padding: "8px",
+    backgroundColor: "#FFE6F0",
+    borderRadius: "4px",
+    fontWeight: "500",
+    margin: "0",
+  },
   link: {
     textAlign: "center",
     marginTop: "1.5rem",
     fontSize: "0.9rem",
-    color: "#888",
+    color: "#666",
+    fontFamily: "'Montserrat', sans-serif",
   },
-  linkTexto: { color: "#c8a96e", fontWeight: "600", textDecoration: "none" },
+  linkTexto: { 
+    color: "#E91E63", 
+    fontWeight: "700", 
+    textDecoration: "none",
+    transition: "opacity 0.2s",
+  },
 };

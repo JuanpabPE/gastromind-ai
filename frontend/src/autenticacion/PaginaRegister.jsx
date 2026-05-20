@@ -1,59 +1,302 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useAuth } from "./useAuth";
 import { useNavigate, Link } from "react-router-dom";
+import logoTanta from "../assets/images/logo_tanta.png";
+
+// Criterios de validación de contraseña
+const CRITERIOS_CONTRASEÑA = {
+  minimo: { test: (p) => p.length >= 6, label: "Mínimo 6 caracteres" },
+  mayuscula: {
+    test: (p) => /[A-Z]/.test(p),
+    label: "Al menos 1 mayúscula (A-Z)",
+  },
+  minuscula: {
+    test: (p) => /[a-z]/.test(p),
+    label: "Al menos 1 minúscula (a-z)",
+  },
+  numero: { test: (p) => /[0-9]/.test(p), label: "Al menos 1 número (0-9)" },
+  especial: {
+    test: (p) => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(p),
+    label: "Al menos 1 carácter especial (!@#$%^&*)",
+  },
+};
+
+// Generar contraseña aleatoria muy segura (garantiza todos los criterios)
+function generarContraseñaAleatoria() {
+  const mayusculas = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const minusculas = "abcdefghijklmnopqrstuvwxyz";
+  const numeros = "0123456789";
+  const especiales = "!@#$%^&*()_+-=[]{}';:\"\\|,.<>/?";
+  
+  // Garantizar al menos uno de cada tipo
+  let contraseña = [
+    mayusculas[Math.floor(Math.random() * mayusculas.length)],
+    minusculas[Math.floor(Math.random() * minusculas.length)],
+    numeros[Math.floor(Math.random() * numeros.length)],
+    especiales[Math.floor(Math.random() * especiales.length)],
+  ];
+  
+  // Completar hasta 12 caracteres con mezcla aleatoria
+  const todos = mayusculas + minusculas + numeros + especiales;
+  for (let i = contraseña.length; i < 12; i++) {
+    contraseña.push(todos[Math.floor(Math.random() * todos.length)]);
+  }
+  
+  // Mezclar para que no sea predecible
+  contraseña = contraseña.sort(() => Math.random() - 0.5);
+  return contraseña.join("");
+}
+
+function evaluarFortalezaContraseña(password) {
+  const cumplidos = Object.values(CRITERIOS_CONTRASEÑA).filter((c) =>
+    c.test(password),
+  ).length;
+  const totalCriterios = Object.keys(CRITERIOS_CONTRASEÑA).length;
+
+  // NO SEGURA: falta al menos un criterio
+  if (cumplidos < totalCriterios) {
+    return { nivel: "no segura", porcentaje: 33, color: "#E91E63" };
+  }
+
+  // MUY SEGURA: todos los criterios + 10+ caracteres (silencioso, no mostrar en UI)
+  if (password.length >= 10) {
+    return { nivel: "muy segura", porcentaje: 100, color: "#4CAF50" };
+  }
+
+  // SEGURA: todos los criterios (6-9 caracteres)
+  return { nivel: "segura", porcentaje: 66, color: "#FF8C00" };
+}
 
 export default function PaginaRegister() {
   const { register, cargando, error } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ nombre: "", email: "", password: "" });
+  const [form, setForm] = useState({
+    nombre: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [mostrarPassword, setMostrarPassword] = useState(false);
+  const [mostrarConfirmPassword, setMostrarConfirmPassword] = useState(false);
+  const [mostrarTooltipSugerencia, setMostrarTooltipSugerencia] = useState(false);
+  const contraseñaSugeridaRef = useRef("");
+
+  const fortaleza = evaluarFortalezaContraseña(form.password);
+  const contraseñasCoinciden = form.password === form.confirmPassword && form.password !== "";
+  const puedeEnviar =
+    form.nombre && form.email && fortaleza.nivel !== "no segura" && contraseñasCoinciden;
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
+  function toggleSugerencia() {
+    if (!mostrarTooltipSugerencia) {
+      // Solo mostrar sugerencia (sin aplicar aún)
+      const sugerida = generarContraseñaAleatoria();
+      contraseñaSugeridaRef.current = sugerida;
+      setMostrarTooltipSugerencia(true);
+    } else {
+      // Ocultar sugerencia
+      setMostrarTooltipSugerencia(false);
+    }
+  }
+
+  function aplicarSugerencia() {
+    // Aplicar la sugerencia y cerrar
+    setForm({
+      ...form,
+      password: contraseñaSugeridaRef.current,
+      confirmPassword: contraseñaSugeridaRef.current,
+    });
+    setMostrarTooltipSugerencia(false);
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
+    if (!contraseñasCoinciden) {
+      alert("Las contraseñas no coinciden");
+      return;
+    }
+    // Guardar nombre en sessionStorage para /completar
+    sessionStorage.setItem("nombreRegistro", form.nombre);
     const resultado = await register(form);
     if (resultado) navigate("/perfil/completar");
   }
 
   return (
     <div style={estilos.pagina}>
+      {/* Logo TANTA afuera del formulario, esquina superior izquierda */}
+      <img src={logoTanta} alt="TANTA Logo" style={estilos.logoExterno} />
+
       <div style={estilos.tarjeta}>
-        <h1 style={estilos.titulo}>GastroMind AI</h1>
-        <p style={estilos.subtitulo}>Crea tu cuenta en Tanta</p>
+        <h1 style={estilos.titulo}>Crea tu cuenta</h1>
+        <p style={estilos.subtitulo}>en <span style={estilos.spanTanta}>TANTA Restaurante</span></p>
 
         <form onSubmit={handleSubmit} style={estilos.form}>
-          <input
-            name="nombre"
-            type="text"
-            placeholder="Nombre completo"
-            value={form.nombre}
-            onChange={handleChange}
-            style={estilos.input}
-            required
-          />
-          <input
-            name="email"
-            type="email"
-            placeholder="Correo electrónico"
-            value={form.email}
-            onChange={handleChange}
-            style={estilos.input}
-            required
-          />
-          <input
-            name="password"
-            type="password"
-            placeholder="Contraseña (mínimo 6 caracteres)"
-            value={form.password}
-            onChange={handleChange}
-            style={estilos.input}
-            required
-            minLength={6}
-          />
+          <div style={estilos.contenedor}>
+            <label style={estilos.labelTexto}>Nombre completo</label>
+            <input
+              name="nombre"
+              type="text"
+              placeholder="Tu nombre"
+              value={form.nombre}
+              onChange={handleChange}
+              style={estilos.input}
+              required
+            />
+          </div>
+
+          <div style={estilos.contenedor}>
+            <label style={estilos.labelTexto}>Correo electrónico</label>
+            <input
+              name="email"
+              type="email"
+              placeholder="tu@correo.com"
+              value={form.email}
+              onChange={handleChange}
+              style={estilos.input}
+              required
+            />
+          </div>
+
+          {/* Contraseña con validación fuerte y tooltip de sugerencia */}
+          <div style={estilos.contenedor}>
+            <div style={estilos.labelConTooltip}>
+              <label style={estilos.labelTexto}>Contraseña</label>
+              <div style={estilos.contenedorTooltip}>
+                <button
+                  type="button"
+                  onClick={toggleSugerencia}
+                  style={estilos.botonTooltip}
+                  title="Generar sugerencia de contraseña"
+                >
+                  Sugerir
+                </button>
+                {mostrarTooltipSugerencia && (
+                  <div style={estilos.tooltip}>
+                    <div style={estilos.tooltipContenido}>
+                      <p style={estilos.tooltipTexto}>{contraseñaSugeridaRef.current}</p>
+                      <button
+                        type="button"
+                        onClick={aplicarSugerencia}
+                        style={estilos.botonAplicar}
+                      >
+                        Usar esta
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div style={estilos.contenedorContrasena}>
+              <input
+                name="password"
+                type={mostrarPassword ? "text" : "password"}
+                placeholder="Tu contraseña segura"
+                value={form.password}
+                onChange={handleChange}
+                style={estilos.inputContrasena}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setMostrarPassword(!mostrarPassword)}
+                style={estilos.botonOjo}
+                title={mostrarPassword ? "Ocultar" : "Mostrar"}
+              >
+                {mostrarPassword ? "👁️" : "👁️‍🗨️"}
+              </button>
+            </div>
+
+            {/* Barra de fortaleza */}
+            {form.password && (
+              <div style={estilos.barraContenedor}>
+                <div
+                  style={{
+                    ...estilos.barraFondo,
+                    backgroundColor: fortaleza.color,
+                    width: `${fortaleza.porcentaje}%`,
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Etiqueta de fortaleza */}
+            {form.password && (
+              <p style={{ ...estilos.nivelFortaleza, color: fortaleza.color }}>
+                Fortaleza: <strong>{fortaleza.nivel.toUpperCase()}</strong>
+              </p>
+            )}
+
+            {/* Lista de criterios */}
+            {form.password && (
+              <div style={estilos.criterios}>
+                {Object.entries(CRITERIOS_CONTRASEÑA).map(([key, criterio]) => {
+                  const cumple = criterio.test(form.password);
+                  return (
+                    <div key={key} style={estilos.criterio}>
+                      <span style={{ color: cumple ? "#4CAF50" : "#ccc" }}>
+                        {cumple ? "✓" : "○"}
+                      </span>
+                      <span style={{ color: cumple ? "#333" : "#bbb" }}>
+                        {criterio.label}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Repetir Contraseña */}
+          <div style={estilos.contenedor}>
+            <label style={estilos.labelTexto}>Repetir contraseña</label>
+            <div style={estilos.contenedorContrasena}>
+              <input
+                name="confirmPassword"
+                type={mostrarConfirmPassword ? "text" : "password"}
+                placeholder="Confirma tu contraseña"
+                value={form.confirmPassword}
+                onChange={handleChange}
+                style={{
+                  ...estilos.inputContrasena,
+                  borderColor:
+                    form.confirmPassword && !contraseñasCoinciden
+                      ? "#E91E63"
+                      : "inherit",
+                }}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setMostrarConfirmPassword(!mostrarConfirmPassword)}
+                style={estilos.botonOjo}
+                title={mostrarConfirmPassword ? "Ocultar" : "Mostrar"}
+              >
+                {mostrarConfirmPassword ? "👁️" : "👁️‍🗨️"}
+              </button>
+            </div>
+
+            {form.confirmPassword && !contraseñasCoinciden && (
+              <p style={estilos.errorValidacion}>Las contraseñas no coinciden</p>
+            )}
+            {contraseñasCoinciden && (
+              <p style={estilos.exitoValidacion}>Contraseñas coinciden</p>
+            )}
+          </div>
+
           {error && <p style={estilos.error}>{error}</p>}
-          <button type="submit" style={estilos.boton} disabled={cargando}>
+          <button
+            type="submit"
+            style={{
+              ...estilos.boton,
+              opacity: puedeEnviar ? 1 : 0.5,
+              cursor: puedeEnviar ? "pointer" : "not-allowed",
+            }}
+            disabled={!puedeEnviar || cargando}
+          >
             {cargando ? "Creando cuenta..." : "Crear cuenta"}
           </button>
         </form>
@@ -61,7 +304,7 @@ export default function PaginaRegister() {
         <p style={estilos.link}>
           ¿Ya tienes cuenta?{" "}
           <Link to="/login" style={estilos.linkTexto}>
-            Inicia sesión
+            Inicia sesión aquí
           </Link>
         </p>
       </div>
@@ -75,54 +318,236 @@ const estilos = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#f5f0eb",
+    background: "linear-gradient(135deg, #F5F0E8 0%, #EAE1D5 100%)",
+    fontFamily: "'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    position: "relative",
+    overflow: "hidden",
+  },
+  logoExterno: {
+    position: "fixed",
+    top: "2rem",
+    left: "2rem",
+    width: "100px",
+    height: "auto",
+    objectFit: "contain",
+    zIndex: 10,
   },
   tarjeta: {
-    backgroundColor: "#ffffff",
-    padding: "2.5rem",
-    borderRadius: "16px",
+    backgroundColor: "#FAFBFC",
+    padding: "3.5rem 2.5rem",
+    borderRadius: "20px",
     width: "100%",
-    maxWidth: "400px",
-    boxShadow: "0 4px 24px rgba(0,0,0,0.08)",
+    maxWidth: "420px",
+    position: "relative",
   },
   titulo: {
     fontSize: "1.8rem",
     fontWeight: "700",
-    color: "#1a1a1a",
-    margin: "0 0 4px",
+    color: "#8B2E3B",
+    margin: "0 0 8px",
     textAlign: "center",
+    fontFamily: "'Montserrat', sans-serif",
+    letterSpacing: "-0.5px",
   },
   subtitulo: {
-    fontSize: "0.95rem",
-    color: "#888",
+    fontSize: "1.05rem",
+    color: "#666",
     textAlign: "center",
-    marginBottom: "2rem",
+    marginBottom: "2.5rem",
+    fontWeight: "500",
   },
-  form: { display: "flex", flexDirection: "column", gap: "12px" },
+  spanTanta: {
+    color: "#E91E63",
+    fontWeight: "700",
+    fontSize: "1.15rem",
+  },
+  form: { display: "flex", flexDirection: "column", gap: "18px" },
+  contenedor: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+  },
   input: {
-    padding: "12px 16px",
-    borderRadius: "8px",
-    border: "1px solid #e0e0e0",
+    padding: "13px 14px",
+    borderRadius: "10px",
+    border: "1.5px solid #E0E0E0",
     fontSize: "0.95rem",
     outline: "none",
+    fontFamily: "'Montserrat', sans-serif",
+    transition: "all 0.25s ease",
+    backgroundColor: "#FFFFFF",
+  },
+  labelTexto: {
+    fontSize: "0.9rem",
+    fontWeight: "600",
+    color: "#333",
+    display: "block",
+    marginBottom: "2px",
+  },
+  labelConTooltip: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  contenedorTooltip: {
+    position: "relative",
+  },
+  botonTooltip: {
+    background: "none",
+    border: "none",
+    fontSize: "0.85rem",
+    cursor: "pointer",
+    padding: "6px 12px",
+    color: "#E91E63",
+    fontWeight: "600",
+    transition: "all 0.2s",
+    fontFamily: "'Montserrat', sans-serif",
+  },
+  tooltip: {
+    position: "absolute",
+    top: "-120px",
+    right: "-30px",
+    zIndex: 100,
+    backgroundColor: "#8B2E3B",
+    color: "#fff",
+    padding: "0",
+    borderRadius: "10px",
+    minWidth: "280px",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+    fontSize: "0.85rem",
+  },
+  tooltipContenido: {
+    padding: "12px 14px",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "10px",
+  },
+  tooltipTexto: {
+    margin: "0",
+    fontSize: "0.95rem",
+    fontWeight: "700",
+    fontFamily: "monospace",
+    wordBreak: "break-all",
+  },
+  botonAplicar: {
+    backgroundColor: "#E91E63",
+    color: "#fff",
+    border: "none",
+    padding: "8px 14px",
+    borderRadius: "6px",
+    fontSize: "0.8rem",
+    fontWeight: "600",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+  },
+  contenedorContrasena: {
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+  },
+  inputContrasena: {
+    padding: "13px 45px 13px 14px",
+    borderRadius: "10px",
+    border: "1.5px solid #E0E0E0",
+    fontSize: "0.95rem",
+    outline: "none",
+    fontFamily: "'Montserrat', sans-serif",
+    transition: "all 0.25s ease",
+    backgroundColor: "#FFFFFF",
+    width: "100%",
+  },
+  botonOjo: {
+    position: "absolute",
+    right: "12px",
+    border: "none",
+    backgroundColor: "transparent",
+    cursor: "pointer",
+    fontSize: "1.1rem",
+    opacity: 0.6,
+    transition: "opacity 0.2s",
+    padding: "4px",
+  },
+  barraContenedor: {
+    width: "100%",
+    height: "6px",
+    backgroundColor: "#E8E8E8",
+    borderRadius: "3px",
+    overflow: "hidden",
+  },
+  barraFondo: {
+    height: "100%",
+    transition: "all 0.3s ease",
+    borderRadius: "3px",
+  },
+  nivelFortaleza: {
+    fontSize: "0.8rem",
+    margin: "4px 0 0",
+    fontWeight: "600",
+    color: "#E91E63",
+  },
+  criterios: {
+    fontSize: "0.75rem",
+    backgroundColor: "#FFF3E0",
+    padding: "10px 12px",
+    borderRadius: "8px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "6px",
+    border: "1px solid #FFE0B2",
+  },
+  criterio: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+  },
+  errorValidacion: {
+    fontSize: "0.8rem",
+    color: "#E91E63",
+    margin: "4px 0 0",
+    fontWeight: "500",
+  },
+  exitoValidacion: {
+    fontSize: "0.8rem",
+    color: "#4CAF50",
+    margin: "4px 0 0",
+    fontWeight: "500",
   },
   boton: {
-    padding: "12px",
-    borderRadius: "8px",
-    backgroundColor: "#c8a96e",
+    padding: "13px 18px",
+    borderRadius: "10px",
+    backgroundColor: "#E91E63",
     color: "#fff",
-    fontWeight: "600",
+    fontWeight: "700",
     fontSize: "1rem",
     border: "none",
     cursor: "pointer",
-    marginTop: "8px",
+    marginTop: "24px",
+    transition: "all 0.25s ease",
+    fontFamily: "'Montserrat', sans-serif",
+    boxShadow: "0 4px 12px rgba(233, 30, 99, 0.25)",
   },
-  error: { color: "#e53e3e", fontSize: "0.85rem", margin: "0" },
+  error: {
+    color: "#E91E63",
+    fontSize: "0.85rem",
+    padding: "10px",
+    backgroundColor: "#FFE6F0",
+    borderRadius: "6px",
+    fontWeight: "500",
+    margin: "0",
+    textAlign: "center",
+  },
   link: {
     textAlign: "center",
     marginTop: "1.5rem",
     fontSize: "0.9rem",
-    color: "#888",
+    color: "#666",
+    fontFamily: "'Montserrat', sans-serif",
   },
-  linkTexto: { color: "#c8a96e", fontWeight: "600", textDecoration: "none" },
+  linkTexto: { 
+    color: "#E91E63", 
+    fontWeight: "700", 
+    textDecoration: "none",
+    transition: "opacity 0.2s",
+  },
 };
