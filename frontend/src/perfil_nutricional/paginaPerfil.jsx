@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePerfil } from "./usePerfil";
 
@@ -33,6 +33,7 @@ const PREFERENCIAS_OPCIONES = [
 export default function PaginaPerfil() {
   const { guardarPerfil, cargando, error } = usePerfil();
   const navigate = useNavigate();
+  const [nombreRegistrado, setNombreRegistrado] = useState("");
 
   const [form, setForm] = useState({
     nombre: "",
@@ -43,6 +44,26 @@ export default function PaginaPerfil() {
     preferencias: [],
     objetivo_calorico: 2000,
   });
+
+  // Cargar nombre desde sessionStorage al montar el componente
+  useEffect(() => {
+    const nombre = sessionStorage.getItem("nombreRegistro");
+    if (nombre) {
+      setNombreRegistrado(nombre);
+      setForm(f => ({ ...f, nombre }));
+    }
+  }, []);
+
+  // Validar que el perfil esté completo
+  const perfilIncompleto = 
+    !form.nombre ||
+    form.alergias.length === 0 ||
+    form.enfermedades.length === 0 ||
+    form.preferencias.length === 0;
+
+  const mensajeValidacion = perfilIncompleto ? 
+    "Por favor completa todos los campos: Alergias, Condiciones de salud y Preferencias alimentarias" : 
+    null;
 
   function handleInput(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -66,6 +87,13 @@ export default function PaginaPerfil() {
 
   async function handleSubmit(e) {
     e.preventDefault();
+    
+    // Validar que el perfil esté completo
+    if (perfilIncompleto) {
+      alert("Por favor completa todos los campos obligatorios:\n✓ Alergias\n✓ Condiciones de salud\n✓ Preferencias alimentarias");
+      return;
+    }
+    
     const ok = await guardarPerfil(form);
     if (ok) navigate("/menu");
   }
@@ -82,14 +110,21 @@ export default function PaginaPerfil() {
         <form onSubmit={handleSubmit} style={estilos.form}>
           {/* Datos básicos */}
           <Seccion titulo="Datos básicos">
+            {nombreRegistrado && (
+              <p style={estilos.indicadorRegistrado}>
+                ✓ Registrado como: <strong>{nombreRegistrado}</strong>
+              </p>
+            )}
             <input
               name="nombre"
               placeholder="Tu nombre completo"
               value={form.nombre}
               onChange={handleInput}
-              style={estilos.input}
-              required
+              style={estilos.inputBloqueado}
+              readOnly
+              title="Este nombre fue registrado durante tu registro y no puede modificarse aquí"
             />
+            <p style={estilos.ayudaNombre}>Este nombre no puede modificarse aquí. Si necesitas cambiarlo, deberás crear una nueva cuenta.</p>
             <label style={estilos.label}>Fecha de nacimiento</label>
             <input
               name="fecha_nacimiento"
@@ -172,8 +207,17 @@ export default function PaginaPerfil() {
           </Seccion>
 
           {error && <p style={estilos.error}>{error}</p>}
+          {mensajeValidacion && <p style={estilos.validacion}>{mensajeValidacion}</p>}
 
-          <button type="submit" style={estilos.boton} disabled={cargando}>
+          <button 
+            type="submit" 
+            style={{
+              ...estilos.boton,
+              opacity: perfilIncompleto ? 0.6 : 1,
+              cursor: perfilIncompleto ? "not-allowed" : "pointer",
+            }} 
+            disabled={perfilIncompleto || cargando}
+          >
             {cargando ? "Guardando..." : "Guardar perfil y continuar →"}
           </button>
         </form>
@@ -262,6 +306,37 @@ const estilos = {
     boxSizing: "border-box",
     marginBottom: "8px",
   },
+  inputBloqueado: {
+    padding: "11px 14px",
+    borderRadius: "8px",
+    border: "1px solid #d0d0d0",
+    backgroundColor: "#f5f5f5",
+    fontSize: "0.95rem",
+    outline: "none",
+    width: "100%",
+    boxSizing: "border-box",
+    marginBottom: "8px",
+    color: "#666",
+    cursor: "not-allowed",
+    fontWeight: "500",
+  },
+  indicadorRegistrado: {
+    fontSize: "0.85rem",
+    color: "#228B22",
+    fontWeight: "500",
+    marginBottom: "8px",
+    padding: "6px 8px",
+    backgroundColor: "#f0f8f0",
+    borderRadius: "4px",
+    border: "1px solid #90ee90",
+  },
+  ayudaNombre: {
+    fontSize: "0.75rem",
+    color: "#999",
+    marginBottom: "12px",
+    marginTop: "-4px",
+    fontStyle: "italic",
+  },
   label: {
     fontSize: "0.85rem",
     color: "#666",
@@ -291,6 +366,23 @@ const estilos = {
     border: "none",
     cursor: "pointer",
     marginTop: "1rem",
+    transition: "opacity 0.2s",
   },
-  error: { color: "#e53e3e", fontSize: "0.85rem" },
+  error: { 
+    color: "#e53e3e", 
+    fontSize: "0.85rem",
+    padding: "8px",
+    backgroundColor: "#ffe6e6",
+    borderRadius: "4px",
+    border: "1px solid #ffcccc",
+  },
+  validacion: {
+    color: "#d97706",
+    fontSize: "0.85rem",
+    padding: "8px",
+    backgroundColor: "#fef3c7",
+    borderRadius: "4px",
+    border: "1px solid #fcd34d",
+    marginTop: "8px",
+  },
 };
