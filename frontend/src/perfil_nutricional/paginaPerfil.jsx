@@ -50,20 +50,20 @@ export default function PaginaPerfil() {
     const nombre = sessionStorage.getItem("nombreRegistro");
     if (nombre) {
       setNombreRegistrado(nombre);
-      setForm(f => ({ ...f, nombre }));
+      setForm((f) => ({ ...f, nombre }));
     }
   }, []);
 
   // Validar que el perfil esté completo
-  const perfilIncompleto = 
+  const perfilIncompleto =
     !form.nombre ||
     form.alergias.length === 0 ||
     form.enfermedades.length === 0 ||
     form.preferencias.length === 0;
 
-  const mensajeValidacion = perfilIncompleto ? 
-    "Por favor completa todos los campos: Alergias, Condiciones de salud y Preferencias alimentarias" : 
-    null;
+  const mensajeValidacion = perfilIncompleto
+    ? "Por favor completa todos los campos: Alergias, Condiciones de salud y Preferencias alimentarias"
+    : null;
 
   function handleInput(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -87,13 +87,15 @@ export default function PaginaPerfil() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    
+
     // Validar que el perfil esté completo
     if (perfilIncompleto) {
-      alert("Por favor completa todos los campos obligatorios:\n✓ Alergias\n✓ Condiciones de salud\n✓ Preferencias alimentarias");
+      alert(
+        "Por favor completa todos los campos obligatorios:\n- Alergias\n- Condiciones de salud\n- Preferencias alimentarias"
+      );
       return;
     }
-    
+
     const ok = await guardarPerfil(form);
     if (ok) navigate("/menu");
   }
@@ -112,7 +114,7 @@ export default function PaginaPerfil() {
           <Seccion titulo="Datos básicos">
             {nombreRegistrado && (
               <p style={estilos.indicadorRegistrado}>
-                ✓ Registrado como: <strong>{nombreRegistrado}</strong>
+                Registrado como: <strong>{nombreRegistrado}</strong>
               </p>
             )}
             <input
@@ -124,7 +126,10 @@ export default function PaginaPerfil() {
               readOnly
               title="Este nombre fue registrado durante tu registro y no puede modificarse aquí"
             />
-            <p style={estilos.ayudaNombre}>Este nombre no puede modificarse aquí. Si necesitas cambiarlo, deberás crear una nueva cuenta.</p>
+            <p style={estilos.ayudaNombre}>
+              Este nombre no puede modificarse aquí. Si necesitas cambiarlo,
+              deberás crear una nueva cuenta.
+            </p>
             <label style={estilos.label}>Fecha de nacimiento</label>
             <input
               name="fecha_nacimiento"
@@ -207,18 +212,20 @@ export default function PaginaPerfil() {
           </Seccion>
 
           {error && <p style={estilos.error}>{error}</p>}
-          {mensajeValidacion && <p style={estilos.validacion}>{mensajeValidacion}</p>}
+          {mensajeValidacion && (
+            <p style={estilos.validacion}>{mensajeValidacion}</p>
+          )}
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             style={{
               ...estilos.boton,
               opacity: perfilIncompleto ? 0.6 : 1,
               cursor: perfilIncompleto ? "not-allowed" : "pointer",
-            }} 
+            }}
             disabled={perfilIncompleto || cargando}
           >
-            {cargando ? "Guardando..." : "Guardar perfil y continuar →"}
+            {cargando ? "Guardando..." : "Guardar perfil y continuar"}
           </button>
         </form>
       </div>
@@ -275,12 +282,11 @@ const estilos = {
     justifyContent: "center",
   },
   tarjeta: {
-    backgroundColor: "#fff",
-    borderRadius: "16px",
-    padding: "2.5rem",
+    backgroundColor: "#FAFBFC",
+    borderRadius: "20px",
+    padding: "3.5rem 2.5rem",
     width: "100%",
     maxWidth: "560px",
-    boxShadow: "0 4px 24px rgba(0,0,0,0.08)",
     height: "fit-content",
   },
   titulo: {
@@ -297,9 +303,9 @@ const estilos = {
   },
   form: { display: "flex", flexDirection: "column" },
   input: {
-    padding: "11px 14px",
-    borderRadius: "8px",
-    border: "1px solid #e0e0e0",
+    padding: "13px 14px",
+    borderRadius: "10px",
+    border: "1.5px solid #E0E0E0",
     fontSize: "0.95rem",
     outline: "none",
     width: "100%",
@@ -368,8 +374,8 @@ const estilos = {
     marginTop: "1rem",
     transition: "opacity 0.2s",
   },
-  error: { 
-    color: "#e53e3e", 
+  error: {
+    color: "#e53e3e",
     fontSize: "0.85rem",
     padding: "8px",
     backgroundColor: "#ffe6e6",
