@@ -39,7 +39,7 @@ export default function FichaNutricional({ plato, onCerrar }) {
       if (encontrados.length > 0) {
         setAlerta({
           tipo: "peligro",
-          mensaje: `⚠️ Este plato contiene ${encontrados.join(", ")} — ingredientes que debes evitar según tu perfil.`,
+          mensaje: `Este plato contiene ${encontrados.join(", ")} — ingredientes que debes evitar según tu perfil.`,
         });
         return;
       }
@@ -50,7 +50,7 @@ export default function FichaNutricional({ plato, onCerrar }) {
       ) {
         setAlerta({
           tipo: "precaucion",
-          mensaje: `⚠️ Este plato tiene ${plato.carbohidratos}g de carbohidratos. Consúmelo con moderación si tienes diabetes.`,
+          mensaje: `Este plato tiene ${plato.carbohidratos}g de carbohidratos. Consúmelo con moderación si tienes diabetes.`,
         });
         return;
       }
@@ -58,7 +58,7 @@ export default function FichaNutricional({ plato, onCerrar }) {
       if (perfil.enfermedades?.includes("Hipertensión") && plato.grasas > 25) {
         setAlerta({
           tipo: "precaucion",
-          mensaje: `⚠️ Este plato puede ser alto en sodio. Consúmelo con moderación si tienes hipertensión.`,
+          mensaje: `Este plato puede ser alto en sodio. Consúmelo con moderación si tienes hipertensión.`,
         });
       }
     }
@@ -71,27 +71,27 @@ export default function FichaNutricional({ plato, onCerrar }) {
           ✕
         </button>
 
-        {alerta && (
-          <div
-            style={{
-              backgroundColor:
-                alerta.tipo === "peligro" ? "#fff5f5" : "#fffbeb",
-              border: `1px solid ${alerta.tipo === "peligro" ? "#fed7d7" : "#fbd38d"}`,
-              color: alerta.tipo === "peligro" ? "#e53e3e" : "#c05621",
-              padding: "10px 14px",
-              borderRadius: "8px",
-              fontSize: "0.85rem",
-              fontWeight: "500",
-              marginBottom: "1rem",
-              lineHeight: "1.4",
-            }}
-          >
-            {alerta.mensaje}
-          </div>
-        )}
-
         {/* Contenido scrolleable */}
         <div style={estilos.contenidoScrolleable}>
+          {alerta && (
+            <div
+              style={{
+                backgroundColor:
+                  alerta.tipo === "peligro" ? "#fff5f5" : "#fffbeb",
+                border: `1px solid ${alerta.tipo === "peligro" ? "#fed7d7" : "#fbd38d"}`,
+                color: alerta.tipo === "peligro" ? "#e53e3e" : "#c05621",
+                padding: "10px 14px",
+                borderRadius: "8px",
+                fontSize: "0.85rem",
+                fontWeight: "500",
+                marginBottom: "1rem",
+                lineHeight: "1.4",
+              }}
+            >
+              {alerta.mensaje}
+            </div>
+          )}
+
           <h2 style={estilos.nombre}>{plato.nombre}</h2>
           <p style={estilos.descripcion}>{plato.descripcion}</p>
           <p style={estilos.precio}>S/. {plato.precio}</p>
@@ -134,7 +134,7 @@ export default function FichaNutricional({ plato, onCerrar }) {
 
           {plato.alergenos?.length > 0 && (
             <div style={estilos.seccion}>
-              <h3 style={estilos.tituloSeccion}>⚠️ Contiene alérgenos</h3>
+              <h3 style={estilos.tituloSeccion}>Contiene alérgenos</h3>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                 {plato.alergenos.map((a) => (
                   <span key={a} style={estilos.alergeno}>
@@ -149,17 +149,17 @@ export default function FichaNutricional({ plato, onCerrar }) {
             <h3 style={estilos.tituloSeccion}>Apto para</h3>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
               {plato.apto_vegetariano && (
-                <span style={estilos.apto}>🥗 Vegetariano</span>
+                <span style={estilos.apto}>Vegetariano</span>
               )}
-              {plato.apto_vegano && <span style={estilos.apto}>🌱 Vegano</span>}
+              {plato.apto_vegano && <span style={estilos.apto}>Vegano</span>}
               {plato.apto_sin_gluten && (
-                <span style={estilos.apto}>🌾 Sin gluten</span>
+                <span style={estilos.apto}>Sin gluten</span>
               )}
               {plato.apto_diabetes && (
-                <span style={estilos.apto}>💉 Diabetes</span>
+                <span style={estilos.apto}>Diabetes</span>
               )}
               {plato.apto_hipertension && (
-                <span style={estilos.apto}>❤️ Hipertensión</span>
+                <span style={estilos.apto}>Hipertensión</span>
               )}
             </div>
           </div>
@@ -183,7 +183,7 @@ export default function FichaNutricional({ plato, onCerrar }) {
                 marginBottom: "6px",
               }}
             >
-              📍 ¿En qué sede estás?
+              En qué sede estás
             </label>
             <select
               value={sede}
@@ -207,9 +207,7 @@ export default function FichaNutricional({ plato, onCerrar }) {
             <button
               onClick={async () => {
                 await registrarConsumo({ ...plato, sede });
-                alert(
-                  `✅ "${plato.nombre}" registrado en tu historial — ${sede}`,
-                );
+                alert(`"${plato.nombre}" registrado en tu historial — ${sede}`);
               }}
               style={estilos.btnPedir}
             >

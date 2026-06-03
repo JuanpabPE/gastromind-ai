@@ -1,16 +1,15 @@
 import { useState, useRef, useEffect } from "react";
-import { useChat } from "./useChat";
 import BurbujaMensaje from "./BurbujaMensaje";
 
 const SUGERENCIAS = [
-  "¿Qué platos me recomiendas para hoy?",
-  "¿Cuál es el plato más ligero?",
-  "¿Qué tiene el lomo saltado?",
-  "¿Hay opciones vegetarianas?",
+  "Que me recomiendas para hoy?",
+  "Cual es el plato mas ligero?",
+  "Que tiene el lomo saltado?",
+  "Hay opciones vegetarianas?",
 ];
 
-export default function VentanaChat({ onCerrar }) {
-  const { mensajes, cargando, enviarMensaje, limpiarChat } = useChat();
+export default function VentanaChat({ onCerrar, chatProps }) {
+  const { mensajes, cargando, enviarMensaje, limpiarChat } = chatProps;
   const [input, setInput] = useState("");
   const bottomRef = useRef(null);
 
@@ -35,10 +34,9 @@ export default function VentanaChat({ onCerrar }) {
   return (
     <div style={estilos.overlay}>
       <div style={estilos.ventana}>
-        {/* Header */}
         <div style={estilos.header}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <span style={{ fontSize: "24px" }}>🍽️</span>
+            <div style={estilos.logoHeader}>T</div>
             <div>
               <p style={estilos.headerTitulo}>Nutricionista Tanta</p>
               <p style={estilos.headerSub}>Tu sommelier nutricional</p>
@@ -50,15 +48,14 @@ export default function VentanaChat({ onCerrar }) {
               style={estilos.btnHeader}
               title="Limpiar chat"
             >
-              🗑️
+              Limpiar
             </button>
             <button onClick={onCerrar} style={estilos.btnHeader}>
-              ✕
+              Cerrar
             </button>
           </div>
         </div>
 
-        {/* Mensajes */}
         <div style={estilos.mensajes}>
           {mensajes.map((m, i) => (
             <BurbujaMensaje key={i} mensaje={m} />
@@ -66,26 +63,21 @@ export default function VentanaChat({ onCerrar }) {
           {cargando && (
             <div
               style={{
-                display: "flex",
-                gap: "8px",
-                alignItems: "center",
-                padding: "8px",
+                padding: "8px 16px",
+                color: "#888",
+                fontSize: "0.85rem",
+                fontStyle: "italic",
               }}
             >
-              <div style={estilos.avatarBot}>🍽️</div>
-              <div style={estilos.cargando}>
-                <span>●</span>
-                <span>●</span>
-                <span>●</span>
-              </div>
+              Escribiendo...
             </div>
           )}
           <div ref={bottomRef} />
         </div>
 
-        {/* Sugerencias */}
         {mensajes.length === 1 && (
           <div style={estilos.sugerencias}>
+            <p style={estilos.sugerenciasTitulo}>Preguntas frecuentes</p>
             {SUGERENCIAS.map((s, i) => (
               <button
                 key={i}
@@ -98,13 +90,12 @@ export default function VentanaChat({ onCerrar }) {
           </div>
         )}
 
-        {/* Input */}
         <div style={estilos.inputArea}>
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Pregúntame sobre el menú..."
+            placeholder="Escribe tu consulta nutricional..."
             style={estilos.textarea}
             rows={1}
             disabled={cargando}
@@ -117,7 +108,7 @@ export default function VentanaChat({ onCerrar }) {
               opacity: cargando || !input.trim() ? 0.5 : 1,
             }}
           >
-            ➤
+            Enviar
           </button>
         </div>
       </div>
@@ -138,20 +129,34 @@ const estilos = {
   },
   ventana: {
     backgroundColor: "#fff",
-    borderRadius: "16px",
-    width: "380px",
-    height: "580px",
+    borderRadius: "12px",
+    width: "400px",
+    height: "600px",
     display: "flex",
     flexDirection: "column",
     boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
     overflow: "hidden",
+    fontFamily: "Georgia, serif",
   },
   header: {
-    backgroundColor: "#c8a96e",
+    backgroundColor: "#8B1A1A",
     padding: "1rem",
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+  },
+  logoHeader: {
+    width: "36px",
+    height: "36px",
+    borderRadius: "50%",
+    backgroundColor: "#fff",
+    color: "#8B1A1A",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontWeight: "800",
+    fontSize: "1.1rem",
+    fontFamily: "Georgia, serif",
   },
   headerTitulo: {
     color: "#fff",
@@ -164,45 +169,34 @@ const estilos = {
     background: "rgba(255,255,255,0.2)",
     border: "none",
     color: "#fff",
-    borderRadius: "8px",
-    padding: "4px 8px",
+    borderRadius: "6px",
+    padding: "4px 10px",
     cursor: "pointer",
-    fontSize: "0.9rem",
+    fontSize: "0.8rem",
+    fontFamily: "Georgia, serif",
   },
   mensajes: { flex: 1, overflowY: "auto", padding: "1rem" },
-  cargando: {
-    display: "flex",
-    gap: "4px",
-    padding: "10px 14px",
-    backgroundColor: "#f5f0eb",
-    borderRadius: "18px",
-  },
-  avatarBot: {
-    width: "32px",
-    height: "32px",
-    borderRadius: "50%",
-    backgroundColor: "#fff",
-    border: "1px solid #e0e0e0",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "16px",
-    flexShrink: 0,
-  },
-  sugerencias: {
-    padding: "0 1rem 0.5rem",
-    display: "flex",
-    flexWrap: "wrap",
-    gap: "6px",
+  sugerencias: { padding: "0 1rem 0.5rem" },
+  sugerenciasTitulo: {
+    fontSize: "0.75rem",
+    color: "#888",
+    margin: "0 0 6px",
+    textTransform: "uppercase",
+    letterSpacing: "0.05em",
   },
   chip: {
+    display: "block",
+    width: "100%",
+    textAlign: "left",
     padding: "6px 12px",
-    borderRadius: "20px",
+    borderRadius: "6px",
     border: "1px solid #e0e0e0",
-    backgroundColor: "#f9f9f9",
-    fontSize: "0.78rem",
+    backgroundColor: "#fafafa",
+    fontSize: "0.82rem",
     cursor: "pointer",
     color: "#555",
+    marginBottom: "4px",
+    fontFamily: "Georgia, serif",
   },
   inputArea: {
     padding: "0.75rem",
@@ -214,22 +208,23 @@ const estilos = {
   textarea: {
     flex: 1,
     padding: "10px 14px",
-    borderRadius: "20px",
+    borderRadius: "8px",
     border: "1px solid #e0e0e0",
     fontSize: "0.9rem",
     resize: "none",
     outline: "none",
-    fontFamily: "inherit",
+    fontFamily: "Georgia, serif",
   },
   btnEnviar: {
-    width: "40px",
-    height: "40px",
-    borderRadius: "50%",
-    backgroundColor: "#c8a96e",
+    padding: "10px 16px",
+    borderRadius: "8px",
+    backgroundColor: "#8B1A1A",
     color: "#fff",
     border: "none",
     cursor: "pointer",
-    fontSize: "1rem",
-    flexShrink: 0,
+    fontSize: "0.85rem",
+    fontWeight: "600",
+    fontFamily: "Georgia, serif",
+    whiteSpace: "nowrap",
   },
 };

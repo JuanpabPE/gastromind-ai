@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePerfil } from "./usePerfil";
+import logoTanta from "../assets/images/logo_tanta.png";
 
 const ALERGIAS_OPCIONES = [
   "Ninguna",
@@ -34,6 +35,18 @@ export default function PaginaPerfil() {
   const { guardarPerfil, cargando, error } = usePerfil();
   const navigate = useNavigate();
   const [nombreRegistrado, setNombreRegistrado] = useState("");
+  const [validacionErrors, setValidacionErrors] = useState({});
+  const [cooldownUntil, setCooldownUntil] = useState(null);
+  const [cooldownMessage, setCooldownMessage] = useState("");
+
+  useEffect(() => {
+    const ts = parseInt(localStorage.getItem("registro_cooldown_until") || "0", 10);
+    if (ts && Date.now() < ts) {
+      setCooldownUntil(ts);
+      const mins = Math.ceil((ts - Date.now()) / 60000);
+      setCooldownMessage(`Demasiados intentos. Intenta nuevamente en ${mins} minutos.`);
+    }
+  }, []);
 
   const [form, setForm] = useState({
     nombre: "",
@@ -45,28 +58,47 @@ export default function PaginaPerfil() {
     objetivo_calorico: 2000,
   });
 
-  // Cargar nombre desde sessionStorage al montar el componente
+  // Cargar nombre desde sessionStorage
   useEffect(() => {
-    const nombre = sessionStorage.getItem("nombreRegistro");
-    if (nombre) {
+    const registroTemp = sessionStorage.getItem("registro_temporal");
+    if (registroTemp) {
+      const { nombre, email } = JSON.parse(registroTemp);
       setNombreRegistrado(nombre);
       setForm((f) => ({ ...f, nombre }));
+    } else {
+      const nombre = sessionStorage.getItem("nombreRegistro");
+      if (nombre) {
+        setNombreRegistrado(nombre);
+        setForm((f) => ({ ...f, nombre }));
+      }
     }
   }, []);
 
-  // Validar que el perfil esté completo
-  const perfilIncompleto =
-    !form.nombre ||
-    form.alergias.length === 0 ||
-    form.enfermedades.length === 0 ||
-    form.preferencias.length === 0;
+  // Validación en tiempo real
+  const validar = () => {
+    const errores = {};
 
-  const mensajeValidacion = perfilIncompleto
-    ? "Por favor completa todos los campos: Alergias, Condiciones de salud y Preferencias alimentarias"
-    : null;
+    if (!form.fecha_nacimiento) {
+      errores.fecha_nacimiento = "Debes ingresar tu fecha de nacimiento";
+    }
+    if (form.alergias.length === 0) {
+      errores.alergias = "Selecciona al menos una opción de alergias";
+    }
+    if (form.enfermedades.length === 0) {
+      errores.enfermedades =
+        "Selecciona al menos una opción de condiciones de salud";
+    }
+    if (form.preferencias.length === 0) {
+      errores.preferencias = "Selecciona al menos una preferencia alimentaria";
+    }
+
+    setValidacionErrors(errores);
+    return Object.keys(errores).length === 0;
+  };
 
   function handleInput(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
+    setValidacionErrors({ ...validacionErrors, [e.target.name]: null });
   }
 
   function toggleOpcion(campo, valor) {
@@ -74,6 +106,7 @@ export default function PaginaPerfil() {
 
     if (valor === "Ninguna") {
       setForm({ ...form, [campo]: ["Ninguna"] });
+      setValidacionErrors({ ...validacionErrors, [campo]: null });
       return;
     }
 
@@ -83,16 +116,20 @@ export default function PaginaPerfil() {
       : [...sinNinguna, valor];
 
     setForm({ ...form, [campo]: nueva });
+    setValidacionErrors({ ...validacionErrors, [campo]: null });
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
 
-    // Validar que el perfil esté completo
-    if (perfilIncompleto) {
-      alert(
-        "Por favor completa todos los campos obligatorios:\n- Alergias\n- Condiciones de salud\n- Preferencias alimentarias"
-      );
+    if (cooldownUntil && Date.now() < cooldownUntil) {
+      const mins = Math.ceil((cooldownUntil - Date.now()) / 60000);
+      setCooldownMessage(`Demasiados intentos. Espera ${mins} minutos antes de reintentar.`);
+      return;
+    }
+
+    // Validar antes de enviar
+    if (!validar()) {
       return;
     }
 
@@ -102,46 +139,59 @@ export default function PaginaPerfil() {
 
   return (
     <div style={estilos.pagina}>
+      {/* Logo TANTA afuera del formulario */}
+      <img src={logoTanta} alt="TANTA Logo" style={estilos.logoExterno} />
+
       <div style={estilos.tarjeta}>
-        <h1 style={estilos.titulo}>Tu perfil nutricional</h1>
+        <h1 style={estilos.titulo}>Completa tu perfil</h1>
         <p style={estilos.subtitulo}>
-          Esta información permite a GastroMind recomendarte platos
-          personalizados y alertarte sobre alérgenos.
+          en <span style={estilos.spanTanta}>TANTA Restaurante</span>
         </p>
 
         <form onSubmit={handleSubmit} style={estilos.form}>
           {/* Datos básicos */}
-          <Seccion titulo="Datos básicos">
-            {nombreRegistrado && (
-              <p style={estilos.indicadorRegistrado}>
-                Registrado como: <strong>{nombreRegistrado}</strong>
+          <div style={estilos.seccion}>
+            <h3 style={estilos.tituloSeccion}>Información Personal</h3>
+
+            <div style={estilos.contenedor}>
+              <label style={estilos.label}>Nombre</label>
+              <input
+                name="nombre"
+                placeholder="Tu nombre completo"
+                value={form.nombre}
+                style={estilos.inputDisabled}
+                readOnly
+              />
+              <p style={estilos.ayuda}>
+                Este nombre fue registrado durante tu registro
               </p>
-            )}
-            <input
-              name="nombre"
-              placeholder="Tu nombre completo"
-              value={form.nombre}
-              onChange={handleInput}
-              style={estilos.inputBloqueado}
-              readOnly
-              title="Este nombre fue registrado durante tu registro y no puede modificarse aquí"
-            />
-            <p style={estilos.ayudaNombre}>
-              Este nombre no puede modificarse aquí. Si necesitas cambiarlo,
-              deberás crear una nueva cuenta.
-            </p>
-            <label style={estilos.label}>Fecha de nacimiento</label>
-            <input
-              name="fecha_nacimiento"
-              type="date"
-              value={form.fecha_nacimiento}
-              onChange={handleInput}
-              style={estilos.input}
-            />
-          </Seccion>
+            </div>
+
+            <div style={estilos.contenedor}>
+              <label style={estilos.label}>Fecha de nacimiento</label>
+              <input
+                name="fecha_nacimiento"
+                type="date"
+                value={form.fecha_nacimiento}
+                onChange={handleInput}
+                style={{
+                  ...estilos.input,
+                  borderColor: validacionErrors.fecha_nacimiento
+                    ? "#e53e3e"
+                    : "#e0e0e0",
+                }}
+              />
+              {validacionErrors.fecha_nacimiento && (
+                <p style={estilos.errorMensaje}>
+                  {validacionErrors.fecha_nacimiento}
+                </p>
+              )}
+            </div>
+          </div>
 
           {/* Alergias */}
-          <Seccion titulo="⚠️ Alergias">
+          <div style={estilos.seccion}>
+            <h3 style={estilos.tituloSeccion}>Alergias</h3>
             <p style={estilos.ayuda}>
               La IA te alertará si un plato contiene estos ingredientes, incluso
               en trazas.
@@ -157,10 +207,14 @@ export default function PaginaPerfil() {
                 />
               ))}
             </div>
-          </Seccion>
+            {validacionErrors.alergias && (
+              <p style={estilos.errorMensaje}>{validacionErrors.alergias}</p>
+            )}
+          </div>
 
-          {/* Enfermedades */}
-          <Seccion titulo="🏥 Condiciones de salud">
+          {/* Condiciones de salud */}
+          <div style={estilos.seccion}>
+            <h3 style={estilos.tituloSeccion}>Condiciones de Salud</h3>
             <p style={estilos.ayuda}>
               El motor de recomendaciones filtrará platos según tu condición.
             </p>
@@ -175,10 +229,16 @@ export default function PaginaPerfil() {
                 />
               ))}
             </div>
-          </Seccion>
+            {validacionErrors.enfermedades && (
+              <p style={estilos.errorMensaje}>
+                {validacionErrors.enfermedades}
+              </p>
+            )}
+          </div>
 
           {/* Preferencias */}
-          <Seccion titulo="🥗 Preferencias alimentarias">
+          <div style={estilos.seccion}>
+            <h3 style={estilos.tituloSeccion}>Preferencias Alimentarias</h3>
             <div style={estilos.chips}>
               {PREFERENCIAS_OPCIONES.map((op) => (
                 <Chip
@@ -190,11 +250,17 @@ export default function PaginaPerfil() {
                 />
               ))}
             </div>
-          </Seccion>
+            {validacionErrors.preferencias && (
+              <p style={estilos.errorMensaje}>
+                {validacionErrors.preferencias}
+              </p>
+            )}
+          </div>
 
           {/* Objetivo calórico */}
-          <Seccion titulo="🎯 Objetivo calórico diario">
-            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <div style={estilos.seccion}>
+            <h3 style={estilos.tituloSeccion}>Objetivo Calórico Diario</h3>
+            <div style={estilos.rango}>
               <input
                 type="range"
                 name="objetivo_calorico"
@@ -203,29 +269,28 @@ export default function PaginaPerfil() {
                 step="100"
                 value={form.objetivo_calorico}
                 onChange={handleInput}
-                style={{ flex: 1 }}
+                style={estilos.inputRange}
               />
               <span style={estilos.calorias}>
                 {form.objetivo_calorico} kcal
               </span>
             </div>
-          </Seccion>
+          </div>
 
-          {error && <p style={estilos.error}>{error}</p>}
-          {mensajeValidacion && (
-            <p style={estilos.validacion}>{mensajeValidacion}</p>
+          {(cooldownMessage || error) && (
+            <p style={estilos.errorGlobal}>{cooldownMessage || error}</p>
           )}
 
           <button
             type="submit"
             style={{
               ...estilos.boton,
-              opacity: perfilIncompleto ? 0.6 : 1,
-              cursor: perfilIncompleto ? "not-allowed" : "pointer",
+              opacity: cargando ? 0.7 : 1,
+              cursor: cargando ? "not-allowed" : "pointer",
             }}
-            disabled={perfilIncompleto || cargando}
+            disabled={cargando || (cooldownUntil && Date.now() < cooldownUntil)}
           >
-            {cargando ? "Guardando..." : "Guardar perfil y continuar"}
+            {cargando ? "Guardando..." : "Guardar Perfil y Continuar"}
           </button>
         </form>
       </div>
@@ -257,15 +322,16 @@ function Chip({ label, activo, onClick, color }) {
       type="button"
       onClick={onClick}
       style={{
-        padding: "6px 14px",
+        padding: "8px 16px",
         borderRadius: "20px",
         border: `2px solid ${activo ? color : "#e0e0e0"}`,
         backgroundColor: activo ? color : "#fff",
-        color: activo ? "#fff" : "#555",
-        fontSize: "0.85rem",
-        fontWeight: activo ? "600" : "400",
+        color: activo ? "#fff" : "#666",
+        fontSize: "0.9rem",
+        fontWeight: activo ? "600" : "500",
         cursor: "pointer",
-        transition: "all 0.15s",
+        transition: "all 0.2s ease",
+        fontFamily: "'Montserrat', sans-serif",
       }}
     >
       {label}
@@ -276,32 +342,82 @@ function Chip({ label, activo, onClick, color }) {
 const estilos = {
   pagina: {
     minHeight: "100vh",
-    backgroundColor: "#f5f0eb",
-    padding: "2rem 1rem",
     display: "flex",
+    alignItems: "center",
     justifyContent: "center",
+    background: "linear-gradient(135deg, #F5F0E8 0%, #EAE1D5 100%)",
+    fontFamily:
+      "'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    position: "relative",
+    overflow: "hidden",
+    padding: "2rem 1rem",
+  },
+  logoExterno: {
+    position: "fixed",
+    top: "2rem",
+    left: "2rem",
+    width: "100px",
+    height: "auto",
+    objectFit: "contain",
+    zIndex: 10,
   },
   tarjeta: {
     backgroundColor: "#FAFBFC",
-    borderRadius: "20px",
     padding: "3.5rem 2.5rem",
+    borderRadius: "20px",
     width: "100%",
-    maxWidth: "560px",
-    height: "fit-content",
+    maxWidth: "600px",
+    boxShadow: "0 16px 48px rgba(0, 0, 0, 0.08)",
   },
   titulo: {
-    fontSize: "1.6rem",
+    fontSize: "1.8rem",
     fontWeight: "700",
-    color: "#1a1a1a",
-    marginBottom: "8px",
+    color: "#8B2E3B",
+    margin: "0 0 8px",
+    textAlign: "center",
+    fontFamily: "'Montserrat', sans-serif",
+    letterSpacing: "-0.5px",
   },
   subtitulo: {
-    fontSize: "0.9rem",
-    color: "#888",
-    marginBottom: "2rem",
-    lineHeight: "1.5",
+    fontSize: "1.05rem",
+    color: "#666",
+    textAlign: "center",
+    marginBottom: "2.5rem",
+    fontWeight: "500",
   },
-  form: { display: "flex", flexDirection: "column" },
+  spanTanta: {
+    color: "#E91E63",
+    fontWeight: "700",
+    fontSize: "1.15rem",
+  },
+  form: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "24px",
+  },
+  seccion: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "12px",
+  },
+  tituloSeccion: {
+    fontSize: "1rem",
+    fontWeight: "600",
+    color: "#8B2E3B",
+    margin: "0",
+    fontFamily: "'Montserrat', sans-serif",
+  },
+  contenedor: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "6px",
+  },
+  label: {
+    fontSize: "0.9rem",
+    fontWeight: "500",
+    color: "#333",
+    fontFamily: "'Montserrat', sans-serif",
+  },
   input: {
     padding: "13px 14px",
     borderRadius: "10px",
@@ -310,85 +426,79 @@ const estilos = {
     outline: "none",
     width: "100%",
     boxSizing: "border-box",
-    marginBottom: "8px",
+    fontFamily: "'Montserrat', sans-serif",
+    transition: "border-color 0.2s ease",
   },
-  inputBloqueado: {
-    padding: "11px 14px",
-    borderRadius: "8px",
-    border: "1px solid #d0d0d0",
-    backgroundColor: "#f5f5f5",
+  inputDisabled: {
+    padding: "13px 14px",
+    borderRadius: "10px",
+    border: "1.5px solid #E0E0E0",
     fontSize: "0.95rem",
-    outline: "none",
+    backgroundColor: "#f9f9f9",
+    color: "#666",
     width: "100%",
     boxSizing: "border-box",
-    marginBottom: "8px",
-    color: "#666",
+    fontFamily: "'Montserrat', sans-serif",
     cursor: "not-allowed",
-    fontWeight: "500",
-  },
-  indicadorRegistrado: {
-    fontSize: "0.85rem",
-    color: "#228B22",
-    fontWeight: "500",
-    marginBottom: "8px",
-    padding: "6px 8px",
-    backgroundColor: "#f0f8f0",
-    borderRadius: "4px",
-    border: "1px solid #90ee90",
-  },
-  ayudaNombre: {
-    fontSize: "0.75rem",
-    color: "#999",
-    marginBottom: "12px",
-    marginTop: "-4px",
-    fontStyle: "italic",
-  },
-  label: {
-    fontSize: "0.85rem",
-    color: "#666",
-    marginBottom: "4px",
-    display: "block",
   },
   ayuda: {
-    fontSize: "0.82rem",
-    color: "#999",
-    marginBottom: "10px",
-    marginTop: "-4px",
+    fontSize: "0.85rem",
+    color: "#888",
+    margin: "0 0 8px 0",
+    fontStyle: "normal",
   },
-  chips: { display: "flex", flexWrap: "wrap", gap: "8px" },
+  chips: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "10px",
+  },
+  rango: {
+    display: "flex",
+    alignItems: "center",
+    gap: "16px",
+  },
+  inputRange: {
+    flex: 1,
+    height: "6px",
+    borderRadius: "3px",
+    background: "linear-gradient(to right, #E91E63, #8B2E3B)",
+    outline: "none",
+    WebkitAppearance: "none",
+  },
   calorias: {
     fontSize: "1.1rem",
     fontWeight: "700",
-    color: "#c8a96e",
-    minWidth: "80px",
+    color: "#E91E63",
+    minWidth: "100px",
+    textAlign: "right",
   },
   boton: {
-    padding: "13px",
-    borderRadius: "8px",
-    backgroundColor: "#c8a96e",
+    padding: "13px 16px",
+    borderRadius: "10px",
+    backgroundColor: "#E91E63",
     color: "#fff",
     fontWeight: "600",
     fontSize: "1rem",
     border: "none",
     cursor: "pointer",
-    marginTop: "1rem",
-    transition: "opacity 0.2s",
+    transition: "all 0.2s ease",
+    fontFamily: "'Montserrat', sans-serif",
+    marginTop: "16px",
   },
-  error: {
+  errorMensaje: {
     color: "#e53e3e",
     fontSize: "0.85rem",
-    padding: "8px",
-    backgroundColor: "#ffe6e6",
-    borderRadius: "4px",
-    border: "1px solid #ffcccc",
+    margin: "4px 0 0 0",
+    fontWeight: "500",
   },
-  validacion: {
-    color: "#d97706",
-    fontSize: "0.85rem",
-    padding: "8px",
-    backgroundColor: "#fef3c7",
-    borderRadius: "4px",
-    border: "1px solid #fcd34d",
-    marginTop: "8px",
+  errorGlobal: {
+    color: "#e53e3e",
+    fontSize: "0.9rem",
+    padding: "12px 14px",
+    backgroundColor: "#ffe6e6",
+    borderRadius: "8px",
+    border: "1px solid #ffcccc",
+    margin: "8px 0 0 0",
+    fontWeight: "500",
   },
 };

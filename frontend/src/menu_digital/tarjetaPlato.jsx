@@ -12,7 +12,7 @@ export default function TarjetaPlato({ plato, tieneAlergeno, onClick }) {
     >
       {conAlergeno && (
         <div style={estilos.alertaAlergeno}>
-          ⚠️ Contiene alérgenos de tu perfil
+          Contiene alérgenos de tu perfil
         </div>
       )}
 
@@ -25,14 +25,16 @@ export default function TarjetaPlato({ plato, tieneAlergeno, onClick }) {
       </div>
 
       <div style={estilos.nutri}>
-        <span style={estilos.nutriItem}>🔥 {plato.calorias} kcal</span>
-        <span style={estilos.nutriItem}>💪 {plato.proteinas}g prot</span>
-        <span style={estilos.nutriItem}>🌾 {plato.carbohidratos}g carbs</span>
+        <span style={estilos.nutriItem}>{plato.calorias} kcal</span>
+        <span style={estilos.nutriItem}>{plato.proteinas}g prot</span>
+        <span style={estilos.nutriItem}>{plato.carbohidratos}g carbs</span>
       </div>
 
       <div style={estilos.badges}>
-        {plato.apto_vegetariano && <span style={estilos.badge}>🥗 Veg</span>}
-        {plato.apto_vegano && <span style={estilos.badge}>🌱 Vegano</span>}
+        {plato.apto_vegetariano && (
+          <span style={estilos.badge}>Vegetariano</span>
+        )}
+        {plato.apto_vegano && <span style={estilos.badge}>Vegano</span>}
         {plato.apto_sin_gluten && <span style={estilos.badge}>Sin gluten</span>}
         {plato.apto_diabetes && <span style={estilos.badge}>Diabetes</span>}
       </div>

@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
+from autenticacion.router import router as auth_router
 from perfil_nutricional.router import router as perfil_router
 from menu_digital.router import router as menu_router
 from alertas_alergenos.router import router as alertas_router
@@ -22,6 +23,7 @@ app.add_middleware(
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    print(f"❌ VALIDATION ERROR: {exc.errors()}")
     return JSONResponse(
         status_code=422,
         content={"detail": exc.errors()},
@@ -36,6 +38,7 @@ async def general_exception_handler(request: Request, exc: Exception):
         headers={"Access-Control-Allow-Origin": "*"},
     )
 
+app.include_router(auth_router)
 app.include_router(perfil_router)
 app.include_router(menu_router)
 app.include_router(alertas_router)

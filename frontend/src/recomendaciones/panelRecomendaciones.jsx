@@ -17,14 +17,14 @@ export default function PanelRecomendaciones({ onVerFicha }) {
 
   return (
     <div style={estilos.contenedor}>
-      <h2 style={estilos.titulo}>✨ Recomendados para ti</h2>
+      <h2 style={estilos.titulo}>Para ti</h2>
       <p style={estilos.subtitulo}>
         Basado en tu perfil de salud, preferencias e historial
       </p>
       <div style={estilos.lista}>
         {recomendaciones.map((plato, i) => (
           <TarjetaRecomendacion
-            key={plato.id}
+            key={`${plato.id}-${i}`}
             plato={plato}
             posicion={i + 1}
             onClick={onVerFicha}
