@@ -90,6 +90,10 @@ async def finalizar_pedido(pedido_id: str, mesa_id: str):
             .execute()
 
     # Registra en historial cada item con usuario
+    # Obtener sede de la mesa para registrar correctamente
+    mesa_resp = supabase.table("mesas").select("sede").eq("id", mesa_id).single().execute()
+    sede_actual = mesa_resp.data.get("sede") if mesa_resp and mesa_resp.data else "Sin especificar"
+
     for item in items.data or []:
         if item.get("usuario_id") and item.get("plato_id"):
             supabase.table("historial").insert({
@@ -100,7 +104,7 @@ async def finalizar_pedido(pedido_id: str, mesa_id: str):
                 "proteinas": 0,
                 "carbohidratos": 0,
                 "grasas": 0,
-                "sede": "Surco"
+                "sede": sede_actual
             }).execute()
 
     # Cierra el pedido y libera la mesa

@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../compartido/api/cliente";
 import { useNavigate } from "react-router-dom";
+import logoTanta from "../assets/images/logo_tanta.png";
+import { tema } from "../compartido/estilos/tema";
 
 export default function PaginaAdmin() {
   const [datos, setDatos] = useState(null);
@@ -109,38 +111,29 @@ export default function PaginaAdmin() {
   return (
     <div style={estilos.pagina}>
       <div style={estilos.header}>
-        <div>
-          <h1 style={estilos.titulo}>Analítica Tanta</h1>
-          <p style={estilos.subtitulo}>Panel de insights para el restaurante</p>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <img src={logoTanta} alt="TANTA" style={{ height: 44 }} />
+          <div>
+            <h1 style={estilos.titulo}>Analítica TANTA</h1>
+            <p style={estilos.subtitulo}>Panel de insights para el restaurante</p>
+          </div>
         </div>
         <button onClick={() => navigate("/menu")} style={estilos.btnVolver}>
-          ← Volver
+          Volver
         </button>
       </div>
 
       {/* KPIs */}
       <div style={estilos.gridKpi}>
-        <Kpi
-          icono="👥"
-          valor={datos.totalUsuarios}
-          label="Usuarios registrados"
-        />
-        <Kpi
-          icono="🍽️"
-          valor={datos.totalRegistros}
-          label="Platos registrados"
-        />
-        <Kpi
-          icono="🔥"
-          valor={`${datos.caloriasPromedio} kcal`}
-          label="Calorías promedio"
-        />
+        <Kpi valor={datos.totalUsuarios} label="Usuarios registrados" />
+        <Kpi valor={datos.totalRegistros} label="Platos registrados" />
+        <Kpi valor={`${datos.caloriasPromedio} kcal`} label="Calorías promedio" />
       </div>
 
       <div style={estilos.grid2}>
         {/* Platos más pedidos */}
         <div style={estilos.seccion}>
-          <h2 style={estilos.tituloSeccion}>🏆 Platos más pedidos</h2>
+          <h2 style={estilos.tituloSeccion}>Platos más pedidos</h2>
           {datos.platosMasPedidos.length === 0 ? (
             <p style={{ color: "#888", fontSize: "0.9rem" }}>
               Sin registros aún
@@ -158,7 +151,7 @@ export default function PaginaAdmin() {
 
         {/* Alérgenos frecuentes */}
         <div style={estilos.seccion}>
-          <h2 style={estilos.tituloSeccion}>⚠️ Alérgenos más frecuentes</h2>
+          <h2 style={estilos.tituloSeccion}>Alérgenos más frecuentes</h2>
           {datos.alergenosFrecuentes.length === 0 ? (
             <p style={{ color: "#888", fontSize: "0.9rem" }}>Sin datos aún</p>
           ) : (
@@ -181,7 +174,7 @@ export default function PaginaAdmin() {
 
         {/* Preferencias */}
         <div style={estilos.seccion}>
-          <h2 style={estilos.tituloSeccion}>🥗 Preferencias alimentarias</h2>
+          <h2 style={estilos.tituloSeccion}>Preferencias alimentarias</h2>
           {datos.preferencias.length === 0 ? (
             <p style={{ color: "#888", fontSize: "0.9rem" }}>Sin datos aún</p>
           ) : (
@@ -203,7 +196,7 @@ export default function PaginaAdmin() {
         </div>
         {/* Por sede */}
         <div style={estilos.seccion}>
-          <h2 style={estilos.tituloSeccion}>📍 Registros por sede</h2>
+          <h2 style={estilos.tituloSeccion}>Registros por sede</h2>
           {datos.registrosPorSede.length === 0 ? (
             <p style={{ color: "#888", fontSize: "0.9rem" }}>Sin datos aún</p>
           ) : (
@@ -218,9 +211,7 @@ export default function PaginaAdmin() {
 
         {/* Condiciones de salud */}
         <div style={estilos.seccion}>
-          <h2 style={estilos.tituloSeccion}>
-            🏥 Condiciones de salud frecuentes
-          </h2>
+          <h2 style={estilos.tituloSeccion}>Condiciones de salud frecuentes</h2>
           {datos.enfermedadesFrecuentes.length === 0 ? (
             <p style={{ color: "#888", fontSize: "0.9rem" }}>Sin datos aún</p>
           ) : (
@@ -245,27 +236,27 @@ export default function PaginaAdmin() {
   );
 }
 
-function Kpi({ icono, valor, label }) {
+function Kpi({ valor, label }) {
   return (
     <div style={estilos.kpi}>
-      <span style={{ fontSize: "1.8rem" }}>{icono}</span>
+      <div style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: tema.dorado, margin: "0 auto" }} />
       <p
         style={{
           fontSize: "1.8rem",
           fontWeight: "800",
-          color: "#c8a96e",
+          color: tema.dorado,
           margin: "8px 0 4px",
         }}
       >
         {valor}
       </p>
-      <p style={{ fontSize: "0.8rem", color: "#888", margin: 0 }}>{label}</p>
+      <p style={{ fontSize: "0.8rem", color: tema.grisMedio, margin: 0 }}>{label}</p>
     </div>
   );
 }
 
 const estilos = {
-  pagina: { minHeight: "100vh", backgroundColor: "#f5f0eb", padding: "1.5rem" },
+  pagina: { minHeight: "100vh", backgroundColor: tema.crema, padding: "1.5rem" },
   header: {
     display: "flex",
     justifyContent: "space-between",
@@ -275,18 +266,19 @@ const estilos = {
   titulo: {
     fontSize: "1.8rem",
     fontWeight: "700",
-    color: "#1a1a1a",
+    color: tema.negro,
     margin: "0 0 4px",
+    fontFamily: tema.fuenteTitulo,
   },
-  subtitulo: { fontSize: "0.9rem", color: "#888", margin: 0 },
+  subtitulo: { fontSize: "0.9rem", color: tema.grisMedio, margin: 0, fontFamily: tema.fuenteCuerpo },
   btnVolver: {
     padding: "8px 16px",
     borderRadius: "8px",
-    border: "1px solid #e0e0e0",
-    backgroundColor: "#fff",
+    border: `1px solid ${tema.grisClaro}`,
+    backgroundColor: tema.blanco,
     cursor: "pointer",
     fontSize: "0.85rem",
-    color: "#555",
+    color: tema.grisOscuro,
   },
   gridKpi: {
     display: "grid",
@@ -295,7 +287,7 @@ const estilos = {
     marginBottom: "1.5rem",
   },
   kpi: {
-    backgroundColor: "#fff",
+    backgroundColor: tema.blanco,
     borderRadius: "12px",
     padding: "1.5rem",
     textAlign: "center",
@@ -303,7 +295,7 @@ const estilos = {
   },
   grid2: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" },
   seccion: {
-    backgroundColor: "#fff",
+    backgroundColor: tema.blanco,
     borderRadius: "12px",
     padding: "1.5rem",
     boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
@@ -311,9 +303,10 @@ const estilos = {
   tituloSeccion: {
     fontSize: "0.95rem",
     fontWeight: "700",
-    color: "#1a1a1a",
+    color: tema.negro,
     marginTop: 0,
     marginBottom: "1rem",
+    fontFamily: tema.fuenteTitulo,
   },
   itemRanking: {
     display: "flex",
@@ -326,8 +319,8 @@ const estilos = {
     width: "24px",
     height: "24px",
     borderRadius: "50%",
-    backgroundColor: "#c8a96e",
-    color: "#fff",
+    backgroundColor: tema.dorado,
+    color: tema.blanco,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -339,8 +332,8 @@ const estilos = {
     fontSize: "0.75rem",
     padding: "3px 10px",
     borderRadius: "20px",
-    backgroundColor: "#f5f0eb",
-    color: "#c8a96e",
+    backgroundColor: tema.cremaSuave,
+    color: tema.dorado,
     fontWeight: "600",
     whiteSpace: "nowrap",
   },
