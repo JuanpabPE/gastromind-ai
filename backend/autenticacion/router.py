@@ -42,6 +42,7 @@ async def registrar_usuario(datos: RegistroRequest):
             )
         
         usuario_id = signup_response.user.id
+        requiere_verificacion = signup_response.session is None
         
         # 2. Guardar perfil en tabla "perfiles"
         # (RLS permite INSERT sin autenticación durante registro)
@@ -57,7 +58,14 @@ async def registrar_usuario(datos: RegistroRequest):
             "actualizado_en": "now()"
         }
         
-        perfil_response = supabase.table("perfiles").insert(perfil_data).execute()
+        # Si el usuario ya tenía perfil (reintentos de registro), actualizamos por usuario_id
+        # en lugar de fallar por unique constraint.
+        perfil_response = (
+            supabase
+            .table("perfiles")
+            .upsert(perfil_data, on_conflict="usuario_id")
+            .execute()
+        )
         
         if not perfil_response.data:
             raise HTTPException(
@@ -69,6 +77,7 @@ async def registrar_usuario(datos: RegistroRequest):
         return RegistroResponse(
             usuario_id=usuario_id,
             email=datos.email,
+            requiere_verificacion=requiere_verificacion,
             mensaje="Registro completado exitosamente. Verifica tu email para confirmar."
         )
     

@@ -8,6 +8,13 @@ export default function PaginaLogin() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
   const [mostrarContraseña, setMostrarContraseña] = useState(false);
+  const [avisoVerificacion, setAvisoVerificacion] = useState(() => {
+    const aviso = sessionStorage.getItem("avisoVerificacion") || "";
+    if (aviso) {
+      sessionStorage.removeItem("avisoVerificacion");
+    }
+    return aviso;
+  });
   const puedeEnviar = form.email && form.password;
 
   function handleChange(e) {
@@ -16,6 +23,7 @@ export default function PaginaLogin() {
 
   async function handleSubmit(e) {
     e.preventDefault();
+    setAvisoVerificacion("");
     const resultado = await login(form);
     if (resultado) navigate("/menu");
   }
@@ -32,6 +40,10 @@ export default function PaginaLogin() {
         </p>
 
         <form onSubmit={handleSubmit} style={estilos.form}>
+          {avisoVerificacion && (
+            <p style={estilos.avisoVerificacion}>{avisoVerificacion}</p>
+          )}
+
           <div style={estilos.contenedor}>
             <label style={estilos.labelTexto}>Correo electrónico</label>
             <input
@@ -215,6 +227,17 @@ const estilos = {
     borderRadius: "4px",
     fontWeight: "500",
     margin: "0",
+  },
+  avisoVerificacion: {
+    color: "#8B2E3B",
+    fontSize: "0.88rem",
+    padding: "10px 12px",
+    backgroundColor: "#FFF3CD",
+    borderRadius: "8px",
+    border: "1px solid #FFE08A",
+    margin: "0",
+    fontWeight: "600",
+    lineHeight: 1.45,
   },
   link: {
     textAlign: "center",

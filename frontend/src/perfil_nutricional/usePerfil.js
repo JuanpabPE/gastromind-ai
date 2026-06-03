@@ -80,20 +80,14 @@ export function usePerfil() {
 
       const resultado = await response.json();
 
-      // Intentar iniciar sesión automáticamente con las credenciales recién registradas
-      try {
-        await supabase.auth.signInWithPassword({
-          email: registroTemporal.email,
-          password: registroTemporal.password,
-        });
-      } catch (err) {
-        console.warn("Auto-login falló:", err);
-      }
-
       // 3. Limpiar datos temporales
       sessionStorage.removeItem("registro_temporal");
 
-      return true;
+      return {
+        ok: true,
+        requiereVerificacion: Boolean(resultado.requiere_verificacion),
+        mensaje: resultado.mensaje || "Registro completado.",
+      };
     } catch (err) {
       setError(
         err.message || "Error al comunicarse con el servidor de registro.",

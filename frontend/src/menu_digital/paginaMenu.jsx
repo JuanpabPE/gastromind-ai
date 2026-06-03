@@ -16,6 +16,7 @@ export default function PaginaMenu() {
   const [esAdmin, setEsAdmin] = useState(false);
   const [esMozo, setEsMozo] = useState(false);
   const [nombreUsuario, setNombreUsuario] = useState("");
+  const [verificandoSesion, setVerificandoSesion] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,7 +24,10 @@ export default function PaginaMenu() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        navigate("/login", { replace: true });
+        return;
+      }
       const { data } = await supabase
         .from("perfiles")
         .select("nombre, es_admin, es_mozo")
@@ -32,6 +36,7 @@ export default function PaginaMenu() {
       setEsAdmin(data?.es_admin || false);
       setEsMozo(data?.es_mozo || false);
       setNombreUsuario(data?.nombre?.split(" ")[0] || "");
+      setVerificandoSesion(false);
     }
     verificar();
   }, []);
@@ -179,9 +184,9 @@ export default function PaginaMenu() {
 
           {/* Platos */}
           <div style={{ minWidth: 0 }}>
-            {cargando ? (
+            {verificandoSesion || cargando ? (
               <div style={estilos.estadoVacio}>
-                <p style={{ color: tema.grisMedio }}>Cargando carta...</p>
+                <p style={{ color: tema.grisMedio }}>Verificando sesión y cargando carta...</p>
               </div>
             ) : platos.length === 0 ? (
               <div style={estilos.estadoVacio}>

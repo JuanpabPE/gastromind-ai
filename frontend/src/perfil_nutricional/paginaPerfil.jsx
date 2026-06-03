@@ -133,8 +133,16 @@ export default function PaginaPerfil() {
       return;
     }
 
-    const ok = await guardarPerfil(form);
-    if (ok) navigate("/menu");
+    const resultado = await guardarPerfil(form);
+    if (resultado?.ok) {
+      if (resultado.requiereVerificacion) {
+        sessionStorage.setItem(
+          "avisoVerificacion",
+          "Tu cuenta fue creada. Revisa tu correo para verificarla y luego inicia sesión.",
+        );
+      }
+      navigate("/login");
+    }
   }
 
   return (

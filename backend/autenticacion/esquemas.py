@@ -32,6 +32,7 @@ class RegistroResponse(BaseModel):
     """Response después de registro exitoso"""
     usuario_id: str
     email: str
+    requiere_verificacion: bool = False
     mensaje: str
 
     class Config:
@@ -39,6 +40,7 @@ class RegistroResponse(BaseModel):
             "example": {
                 "usuario_id": "uuid-aqui",
                 "email": "usuario@ejemplo.com",
+                "requiere_verificacion": True,
                 "mensaje": "Registro completado exitosamente",
             }
         }

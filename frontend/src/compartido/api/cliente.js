@@ -5,29 +5,41 @@ const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Inicialización: detectar tokens inválidos (p. ej. "Invalid Refresh Token")
-// y limpiar la sesión para evitar errores al cargar la app.
-(async function initAuthCleanup() {
-	try {
-		const { data, error } = await supabase.auth.getUser();
-		if (error && typeof error.message === "string") {
-			const msg = error.message.toLowerCase();
-			if (msg.includes("refresh token") || msg.includes("invalid refresh")) {
-				console.warn("Auth init: token inválido detectado, limpiando sesión...");
-				try {
-					await supabase.auth.signOut();
-				} catch (e) {
-					console.warn("Error durante signOut de limpieza:", e);
-				}
-				try {
-					localStorage.clear();
-					sessionStorage.clear();
-				} catch (e) {
-					console.warn("No se pudo limpiar storage:", e);
-				}
-			}
-		}
-	} catch (e) {
-		console.warn("Inicialización de auth falló:", e);
+const originalGetUser = supabase.auth.getUser.bind(supabase.auth);
+const originalGetSession = supabase.auth.getSession.bind(supabase.auth);
+
+let authCleanupDone = false;
+
+async function limpiarSesionInvalida(error) {
+	if (authCleanupDone) return;
+	authCleanupDone = true;
+	const mensaje = String(error?.message || error || "").toLowerCase();
+	if (!mensaje.includes("refresh token") && !mensaje.includes("invalid refresh")) {
+		return;
 	}
-})();
+	console.warn("Auth cleanup: token inválido detectado, limpiando storage...");
+	try {
+		localStorage.clear();
+		sessionStorage.clear();
+	} catch (e) {
+		console.warn("No se pudo limpiar storage:", e);
+	}
+}
+
+supabase.auth.getUser = async (...args) => {
+	try {
+		return await originalGetUser(...args);
+	} catch (error) {
+		await limpiarSesionInvalida(error);
+		return { data: { user: null }, error: null };
+	}
+};
+
+supabase.auth.getSession = async (...args) => {
+	try {
+		return await originalGetSession(...args);
+	} catch (error) {
+		await limpiarSesionInvalida(error);
+		return { data: { session: null }, error: null };
+	}
+};
