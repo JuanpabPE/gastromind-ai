@@ -9,10 +9,22 @@ export default function PaginaAuthCallback() {
   useEffect(() => {
     async function procesar() {
       try {
-        const { data } = await supabase.auth.getSession();
-        if (data?.session) {
+        // Para procesar el link de verificación/redirección de Supabase
+        if (typeof supabase.auth.getSessionFromUrl === "function") {
+          const { data, error } = await supabase.auth.getSessionFromUrl();
+          if (error) throw error;
+          if (data?.session) {
+            setMensaje("Verificación completada. Redirigiendo...");
+            setTimeout(() => navigate("/login", { replace: true }), 800);
+            return;
+          }
+        }
+
+        // Fallback: intenta leer sesión normal
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (sessionData?.session) {
           setMensaje("Verificación completada. Redirigiendo...");
-          navigate("/login", { replace: true });
+          setTimeout(() => navigate("/login", { replace: true }), 800);
           return;
         }
 
