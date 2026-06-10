@@ -57,7 +57,7 @@ REGLAS IMPORTANTES:
     response = groq_client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=[{"role": "system", "content": sistema}] + mensajes,
-        max_tokens=1024,
+        max_tokens=300,
         temperature=0.7,
     )
 

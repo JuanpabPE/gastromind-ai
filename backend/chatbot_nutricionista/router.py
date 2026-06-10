@@ -24,7 +24,7 @@ async def chatear(request: Request):
         
         # MODO TESTING: Si no hay token, usa usuario fake
         if not auth_header:
-            print("⚠️ Sin token. Usando usuario fake para testing...")
+            print("Sin token. Usando usuario fake para testing...")
             usuario_id = "fake-user-123"
         else:
             token = auth_header.replace("Bearer ", "").replace("bearer ", "")

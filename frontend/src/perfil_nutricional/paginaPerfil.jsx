@@ -40,11 +40,16 @@ export default function PaginaPerfil() {
   const [cooldownMessage, setCooldownMessage] = useState("");
 
   useEffect(() => {
-    const ts = parseInt(localStorage.getItem("registro_cooldown_until") || "0", 10);
+    const ts = parseInt(
+      localStorage.getItem("registro_cooldown_until") || "0",
+      10,
+    );
     if (ts && Date.now() < ts) {
       setCooldownUntil(ts);
       const mins = Math.ceil((ts - Date.now()) / 60000);
-      setCooldownMessage(`Demasiados intentos. Intenta nuevamente en ${mins} minutos.`);
+      setCooldownMessage(
+        `Demasiados intentos. Intenta nuevamente en ${mins} minutos.`,
+      );
     }
   }, []);
 
@@ -124,7 +129,9 @@ export default function PaginaPerfil() {
 
     if (cooldownUntil && Date.now() < cooldownUntil) {
       const mins = Math.ceil((cooldownUntil - Date.now()) / 60000);
-      setCooldownMessage(`Demasiados intentos. Espera ${mins} minutos antes de reintentar.`);
+      setCooldownMessage(
+        `Demasiados intentos. Espera ${mins} minutos antes de reintentar.`,
+      );
       return;
     }
 

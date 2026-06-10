@@ -115,7 +115,9 @@ export default function PaginaAdmin() {
           <img src={logoTanta} alt="TANTA" style={{ height: 44 }} />
           <div>
             <h1 style={estilos.titulo}>Analítica TANTA</h1>
-            <p style={estilos.subtitulo}>Panel de insights para el restaurante</p>
+            <p style={estilos.subtitulo}>
+              Panel de insights para el restaurante
+            </p>
           </div>
         </div>
         <button onClick={() => navigate("/menu")} style={estilos.btnVolver}>
@@ -127,7 +129,10 @@ export default function PaginaAdmin() {
       <div style={estilos.gridKpi}>
         <Kpi valor={datos.totalUsuarios} label="Usuarios registrados" />
         <Kpi valor={datos.totalRegistros} label="Platos registrados" />
-        <Kpi valor={`${datos.caloriasPromedio} kcal`} label="Calorías promedio" />
+        <Kpi
+          valor={`${datos.caloriasPromedio} kcal`}
+          label="Calorías promedio"
+        />
       </div>
 
       <div style={estilos.grid2}>
@@ -239,7 +244,15 @@ export default function PaginaAdmin() {
 function Kpi({ valor, label }) {
   return (
     <div style={estilos.kpi}>
-      <div style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: tema.dorado, margin: "0 auto" }} />
+      <div
+        style={{
+          width: 36,
+          height: 36,
+          borderRadius: 8,
+          backgroundColor: tema.dorado,
+          margin: "0 auto",
+        }}
+      />
       <p
         style={{
           fontSize: "1.8rem",
@@ -250,13 +263,19 @@ function Kpi({ valor, label }) {
       >
         {valor}
       </p>
-      <p style={{ fontSize: "0.8rem", color: tema.grisMedio, margin: 0 }}>{label}</p>
+      <p style={{ fontSize: "0.8rem", color: tema.grisMedio, margin: 0 }}>
+        {label}
+      </p>
     </div>
   );
 }
 
 const estilos = {
-  pagina: { minHeight: "100vh", backgroundColor: tema.crema, padding: "1.5rem" },
+  pagina: {
+    minHeight: "100vh",
+    backgroundColor: tema.crema,
+    padding: "1.5rem",
+  },
   header: {
     display: "flex",
     justifyContent: "space-between",
@@ -270,7 +289,12 @@ const estilos = {
     margin: "0 0 4px",
     fontFamily: tema.fuenteTitulo,
   },
-  subtitulo: { fontSize: "0.9rem", color: tema.grisMedio, margin: 0, fontFamily: tema.fuenteCuerpo },
+  subtitulo: {
+    fontSize: "0.9rem",
+    color: tema.grisMedio,
+    margin: 0,
+    fontFamily: tema.fuenteCuerpo,
+  },
   btnVolver: {
     padding: "8px 16px",
     borderRadius: "8px",

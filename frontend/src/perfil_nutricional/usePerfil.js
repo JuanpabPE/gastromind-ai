@@ -69,7 +69,9 @@ export function usePerfil() {
           } catch (e) {
             console.warn("No se pudo guardar cooldown en localStorage", e);
           }
-          setError("Demasiados intentos de registro o verificación. Intenta de nuevo en unos minutos.");
+          setError(
+            "Demasiados intentos de registro o verificación. Intenta de nuevo en unos minutos.",
+          );
         } else {
           setError(mensajeError);
         }

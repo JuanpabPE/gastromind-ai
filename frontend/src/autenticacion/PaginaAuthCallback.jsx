@@ -32,7 +32,9 @@ export default function PaginaAuthCallback() {
         setTimeout(() => navigate("/login", { replace: true }), 1800);
       } catch (error) {
         console.warn("Error en callback de auth:", error);
-        setMensaje("No se pudo procesar la verificación. Volviendo al login...");
+        setMensaje(
+          "No se pudo procesar la verificación. Volviendo al login...",
+        );
         setTimeout(() => navigate("/login", { replace: true }), 1800);
       }
     }

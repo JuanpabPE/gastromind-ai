@@ -186,7 +186,9 @@ export default function PaginaMenu() {
           <div style={{ minWidth: 0 }}>
             {verificandoSesion || cargando ? (
               <div style={estilos.estadoVacio}>
-                <p style={{ color: tema.grisMedio }}>Verificando sesión y cargando carta...</p>
+                <p style={{ color: tema.grisMedio }}>
+                  Verificando sesión y cargando carta...
+                </p>
               </div>
             ) : platos.length === 0 ? (
               <div style={estilos.estadoVacio}>
