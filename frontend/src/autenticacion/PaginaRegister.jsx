@@ -1,7 +1,8 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useAuth } from "./useAuth";
 import { useNavigate, Link } from "react-router-dom";
-import logoTanta from "../assets/images/logo_tanta.png";
+// TODO: reemplazar por el logo real en ../assets/images/logo_tanta.png
+import logoTanta from "../assets/hero.png";
 
 // Criterios de validación de contraseña
 const CRITERIOS_CONTRASEÑA = {
@@ -16,7 +17,7 @@ const CRITERIOS_CONTRASEÑA = {
   },
   numero: { test: (p) => /[0-9]/.test(p), label: "Al menos 1 número (0-9)" },
   especial: {
-    test: (p) => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(p),
+    test: (p) => /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(p),
     label: "Al menos 1 carácter especial (!@#$%^&*)",
   },
 };
@@ -79,7 +80,7 @@ export default function PaginaRegister() {
   const [mostrarPassword, setMostrarPassword] = useState(false);
   const [mostrarConfirmPassword, setMostrarConfirmPassword] = useState(false);
   const [mostrarTooltipSugerencia, setMostrarTooltipSugerencia] = useState(false);
-  const contraseñaSugeridaRef = useRef("");
+  const [contraseñaSugerida, setContraseñaSugerida] = useState("");
 
   const fortaleza = evaluarFortalezaContraseña(form.password);
   const contraseñasCoinciden = form.password === form.confirmPassword && form.password !== "";
@@ -94,7 +95,7 @@ export default function PaginaRegister() {
     if (!mostrarTooltipSugerencia) {
       // Solo mostrar sugerencia (sin aplicar aún)
       const sugerida = generarContraseñaAleatoria();
-      contraseñaSugeridaRef.current = sugerida;
+      setContraseñaSugerida(sugerida);
       setMostrarTooltipSugerencia(true);
     } else {
       // Ocultar sugerencia
@@ -106,8 +107,8 @@ export default function PaginaRegister() {
     // Aplicar la sugerencia y cerrar
     setForm({
       ...form,
-      password: contraseñaSugeridaRef.current,
-      confirmPassword: contraseñaSugeridaRef.current,
+      password: contraseñaSugerida,
+      confirmPassword: contraseñaSugerida,
     });
     setMostrarTooltipSugerencia(false);
   }
@@ -176,7 +177,7 @@ export default function PaginaRegister() {
                 {mostrarTooltipSugerencia && (
                   <div style={estilos.tooltip}>
                     <div style={estilos.tooltipContenido}>
-                      <p style={estilos.tooltipTexto}>{contraseñaSugeridaRef.current}</p>
+                      <p style={estilos.tooltipTexto}>{contraseñaSugerida}</p>
                       <button
                         type="button"
                         onClick={aplicarSugerencia}

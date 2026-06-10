@@ -8,7 +8,6 @@ export default function PaginaMesaQR() {
   const { sede, numero } = useParams();
   const navigate = useNavigate();
   const [estado, setEstado] = useState("cargando");
-  const [mesa, setMesa] = useState(null);
   const [mensaje, setMensaje] = useState("");
 
   useEffect(() => {
@@ -39,7 +38,6 @@ export default function PaginaMesaQR() {
         return;
       }
       const mesaData = await res.json();
-      setMesa(mesaData);
 
       if (mesaData.estado !== "ocupada") {
         setEstado("mesa_libre");
@@ -68,6 +66,7 @@ export default function PaginaMesaQR() {
       );
     }
     unirse();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

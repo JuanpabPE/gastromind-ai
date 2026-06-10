@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../compartido/api/cliente";
 import { obtenerMesas, abrirPedido } from "./mozoPedidoApi";
@@ -40,18 +40,20 @@ export default function PaginaMozo() {
       setMozo(data);
     }
     verificar();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    cargarMesas();
-  }, [sedeActual]);
-
-  async function cargarMesas() {
+  const cargarMesas = useCallback(async () => {
     setCargando(true);
     const data = await obtenerMesas(sedeActual);
     setMesas(data);
     setCargando(false);
-  }
+  }, [sedeActual]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    cargarMesas();
+  }, [cargarMesas]);
 
   async function handleAbrirMesa(mesa) {
     if (mesa.estado === "ocupada") {

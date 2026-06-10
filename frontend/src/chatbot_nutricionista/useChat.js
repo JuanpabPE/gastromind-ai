@@ -46,7 +46,7 @@ export function useChat() {
           content: data.respuesta,
         },
       ]);
-    } catch (error) {
+    } catch {
       setMensajes((prev) => [
         ...prev,
         {

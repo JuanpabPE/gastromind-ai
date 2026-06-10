@@ -1,3 +1,7 @@
+import logging
+import time
+import uuid
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -10,6 +14,12 @@ from chatbot_nutricionista.router import router as chatbot_router
 from historial_consumo.router import router as historial_router
 from pedidos.router import router as pedidos_router
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s %(message)s",
+)
+logger = logging.getLogger("gastromind-api")
+
 app = FastAPI(title="GastroMind AI", version="1.0.0")
 
 app.add_middleware(
@@ -20,8 +30,37 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.middleware("http")
+async def log_responses(request: Request, call_next):
+    request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
+    request.state.request_id = request_id
+    start_time = time.perf_counter()
+
+    response = await call_next(request)
+    duration_ms = (time.perf_counter() - start_time) * 1000
+
+    response.headers["X-Request-ID"] = request_id
+    logger.info(
+        "request_completed method=%s path=%s status=%s duration_ms=%.2f request_id=%s client=%s",
+        request.method,
+        request.url.path,
+        response.status_code,
+        duration_ms,
+        request_id,
+        request.client.host if request.client else "unknown",
+    )
+    return response
+
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    request_id = getattr(request.state, "request_id", "unknown")
+    logger.warning(
+        "validation_error method=%s path=%s request_id=%s errors=%s",
+        request.method,
+        request.url.path,
+        request_id,
+        exc.errors(),
+    )
     return JSONResponse(
         status_code=422,
         content={"detail": exc.errors()},
@@ -30,6 +69,13 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 @app.exception_handler(Exception)
 async def general_exception_handler(request: Request, exc: Exception):
+    request_id = getattr(request.state, "request_id", "unknown")
+    logger.exception(
+        "unhandled_exception method=%s path=%s request_id=%s",
+        request.method,
+        request.url.path,
+        request_id,
+    )
     return JSONResponse(
         status_code=500,
         content={"detail": str(exc)},

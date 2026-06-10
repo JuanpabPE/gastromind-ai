@@ -14,7 +14,6 @@ export default function PaginaMenu() {
   const [platoSeleccionado, setPlatoSeleccionado] = useState(null);
   const [esAdmin, setEsAdmin] = useState(false);
   const [esMozo, setEsMozo] = useState(false);
-  const categoriaActual = filtros.categoria || "Todos los platos";
   const platosPorCategoria = filtros.categoria
     ? platos
     : agruparPorCategoria(platos);

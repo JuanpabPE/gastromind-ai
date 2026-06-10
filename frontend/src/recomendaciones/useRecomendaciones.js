@@ -21,7 +21,7 @@ export function useRecomendaciones() {
         });
         const data = await response.json();
         setRecomendaciones(data.platos || []);
-      } catch (e) {
+      } catch {
         setError("No se pudieron cargar las recomendaciones");
       } finally {
         setCargando(false);

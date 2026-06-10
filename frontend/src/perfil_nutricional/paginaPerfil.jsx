@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePerfil } from "./usePerfil";
 
@@ -33,10 +33,11 @@ const PREFERENCIAS_OPCIONES = [
 export default function PaginaPerfil() {
   const { guardarPerfil, cargando, error } = usePerfil();
   const navigate = useNavigate();
-  const [nombreRegistrado, setNombreRegistrado] = useState("");
+  // Nombre desde el registro previo (sessionStorage), leído una sola vez al inicializar
+  const nombreRegistrado = sessionStorage.getItem("nombreRegistro") || "";
 
   const [form, setForm] = useState({
-    nombre: "",
+    nombre: nombreRegistrado,
     fecha_nacimiento: "",
     alergias: [],
     intolerancias: [],
@@ -44,15 +45,6 @@ export default function PaginaPerfil() {
     preferencias: [],
     objetivo_calorico: 2000,
   });
-
-  // Cargar nombre desde sessionStorage al montar el componente
-  useEffect(() => {
-    const nombre = sessionStorage.getItem("nombreRegistro");
-    if (nombre) {
-      setNombreRegistrado(nombre);
-      setForm(f => ({ ...f, nombre }));
-    }
-  }, []);
 
   // Validar que el perfil esté completo
   const perfilIncompleto = 

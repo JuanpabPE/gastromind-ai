@@ -4,6 +4,7 @@ import VentanaChat from "./VentanaChat";
 export default function BotonChat() {
   const [abierto, setAbierto] = useState(false);
   const [pos, setPos] = useState({ x: null, y: null });
+  const [arrastrandoVisual, setArrastrandoVisual] = useState(false);
   const arrastrando = useRef(false);
   const offset = useRef({ x: 0, y: 0 });
   const botonRef = useRef(null);
@@ -11,6 +12,7 @@ export default function BotonChat() {
 
   function onMouseDown(e) {
     arrastrando.current = true;
+    setArrastrandoVisual(true);
     movio.current = false;
     const rect = botonRef.current.getBoundingClientRect();
     offset.current = {
@@ -38,6 +40,7 @@ export default function BotonChat() {
 
   function onMouseUp() {
     arrastrando.current = false;
+    setArrastrandoVisual(false);
     window.removeEventListener("mousemove", onMouseMove);
     window.removeEventListener("mouseup", onMouseUp);
   }
@@ -59,7 +62,7 @@ export default function BotonChat() {
     borderRadius: "50px",
     padding: "12px 20px",
     fontSize: "1rem",
-    cursor: arrastrando.current ? "grabbing" : "grab",
+    cursor: arrastrandoVisual ? "grabbing" : "grab",
     zIndex: 1000,
     display: "flex",
     alignItems: "center",

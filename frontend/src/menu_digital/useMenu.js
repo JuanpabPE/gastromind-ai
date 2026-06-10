@@ -43,6 +43,7 @@ export function useMenu() {
       }
     }
     init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
