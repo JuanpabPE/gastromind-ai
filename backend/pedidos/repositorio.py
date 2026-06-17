@@ -1,11 +1,13 @@
 from infraestructura.supabase_cliente import supabase
 
 async def obtener_mesas(sede: str):
+    print(f"Buscando mesas para sede: '{sede}'")
     response = supabase.table("mesas")\
         .select("*, pedidos(id, estado, creado_en)")\
         .eq("sede", sede)\
         .order("numero")\
         .execute()
+    print(f"Resultado: {len(response.data or [])} mesas")
     return response.data or []
 
 async def abrir_pedido(mesa_id: str) -> dict:
