@@ -4,7 +4,7 @@ from .prompts import SISTEMA_NUTRICIONISTA, construir_contexto_perfil
 
 def obtener_menu_texto() -> str:
     response = supabase.table("menu")\
-        .select("nombre, categoria, calorias, alergenos, apto_vegetariano, apto_vegano, apto_sin_gluten, apto_diabetes, apto_hipertension, precio")\
+        .select("nombre, categoria, calorias, proteinas, carbohidratos, grasas, precio, alergenos, apto_vegetariano, apto_vegano, apto_sin_gluten, apto_diabetes, apto_hipertension")\
         .eq("disponible", True)\
         .execute()
     
