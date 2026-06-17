@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
+import { useNavigate } from "react-router-dom";
 
 const SEDES = [
   "Surco - Av. Primavera",
@@ -14,7 +15,7 @@ const BASE_URL = import.meta.env.VITE_APP_URL || "http://localhost:5174";
 
 export default function GeneradorQR() {
   const [sede, setSede] = useState(SEDES[0]);
-
+  const navigate = useNavigate();
   const mesas = Array.from({ length: 20 }, (_, i) => i + 1);
 
   function imprimirQR(numero) {
@@ -54,6 +55,19 @@ export default function GeneradorQR() {
           ))}
         </select>
       </div>
+      <button
+        onClick={() => navigate("/mozo")}
+        style={{
+          marginBottom: "1rem",
+          padding: "8px 16px",
+          borderRadius: "8px",
+          border: "1px solid #e0e0e0",
+          backgroundColor: "#fff",
+          cursor: "pointer",
+        }}
+      >
+        ← Volver
+      </button>
 
       <div style={estilos.grid}>
         {mesas.map((numero) => {

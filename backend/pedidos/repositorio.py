@@ -130,6 +130,7 @@ async def unirse_a_pedido(mesa_id: str, usuario_id: str, nombre: str) -> dict:
     return mesa.data
 
 async def obtener_mesa_por_numero_sede(numero: int, sede: str) -> dict:
+    print(f"Buscando mesa: sede='{sede}', numero={numero}")
     response = supabase.table("mesas")\
         .select("*")\
         .eq("numero", numero)\
