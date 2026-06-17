@@ -60,7 +60,7 @@ export default function PaginaMenu() {
     >
       {/* Header */}
       <div style={estilos.header}>
-        <div style={estilos.headerContenido}>
+        <div style={estilos.headerContenido} className="menu-header-contenido">
           <div style={estilos.logoArea}>
             <img
               src={logoTanta}
@@ -73,7 +73,7 @@ export default function PaginaMenu() {
             </div>
           </div>
 
-          <div style={estilos.headerAcciones}>
+          <div style={estilos.headerAcciones} className="menu-header-acciones">
             {nombreUsuario && (
               <span style={estilos.saludo}>Bienvenido, {nombreUsuario}</span>
             )}
@@ -155,9 +155,9 @@ export default function PaginaMenu() {
         {/* Recomendaciones */}
         <PanelRecomendaciones onVerFicha={setPlatoSeleccionado} />
 
-        <div style={estilos.layout}>
+        <div style={estilos.layout} className="menu-layout">
           {/* Sidebar */}
-          <div style={estilos.sidebar}>
+          <div style={estilos.sidebar} className="menu-sidebar">
             <div style={estilos.filtrosTitulo}>
               <h3
                 style={{
@@ -355,6 +355,9 @@ const estilos = {
     gridTemplateColumns: "240px 1fr",
     gap: "1.5rem",
     alignItems: "start",
+    "@media (max-width: 768px)": {
+      gridTemplateColumns: "1fr",
+    },
   },
   sidebar: { position: "sticky", top: "1.5rem" },
   filtrosTitulo: {

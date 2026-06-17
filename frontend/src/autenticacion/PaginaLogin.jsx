@@ -25,7 +25,15 @@ export default function PaginaLogin() {
     e.preventDefault();
     setAvisoVerificacion("");
     const resultado = await login(form);
-    if (resultado) navigate("/menu");
+    if (resultado) {
+      const redirect = localStorage.getItem("redirect_after_login");
+      if (redirect) {
+        localStorage.removeItem("redirect_after_login");
+        navigate(redirect);
+      } else {
+        navigate("/menu");
+      }
+    }
   }
 
   return (
