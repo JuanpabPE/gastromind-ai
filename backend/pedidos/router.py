@@ -48,7 +48,10 @@ async def pedido_activo(mesa_id: str):
 
 @router.get("/mesa-por-ubicacion/{sede}/{numero}")
 async def mesa_por_ubicacion(sede: str, numero: int):
-    mesa = await repositorio.obtener_mesa_por_numero_sede(numero, sede)
+    from urllib.parse import unquote
+    sede_decoded = unquote(sede)
+    print(f"sede recibida: '{sede}' → decoded: '{sede_decoded}'")
+    mesa = await repositorio.obtener_mesa_por_numero_sede(numero, sede_decoded)
     if not mesa:
         raise HTTPException(status_code=404, detail="Mesa no encontrada")
     return mesa
