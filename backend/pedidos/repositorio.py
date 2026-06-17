@@ -129,6 +129,28 @@ async def unirse_a_pedido(mesa_id: str, usuario_id: str, nombre: str) -> dict:
         .eq("id", mesa_id)\
         .single()\
         .execute()
+    
+    pedido_id = mesa.data.get("pedido_activo_id")
+    if not pedido_id:
+        return mesa.data
+
+    # Obtener clientes actuales
+    pedido = supabase.table("pedidos")\
+        .select("clientes_unidos")\
+        .eq("id", pedido_id)\
+        .single()\
+        .execute()
+    
+    clientes = pedido.data.get("clientes_unidos") or []
+    
+    # Agregar si no está ya
+    if not any(c["id"] == usuario_id for c in clientes):
+        clientes.append({"id": usuario_id, "nombre": nombre})
+        supabase.table("pedidos")\
+            .update({"clientes_unidos": clientes})\
+            .eq("id", pedido_id)\
+            .execute()
+
     return mesa.data
 
 async def obtener_mesa_por_numero_sede(numero: int, sede: str) -> dict:
