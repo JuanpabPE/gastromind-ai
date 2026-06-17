@@ -188,7 +188,13 @@ export default function PaginaMozo() {
               borderColor: seccionCanje ? "#c8a96e" : "#e0e0e0",
             }}
           >
-            🎁 Canjear premio
+            Canjear premio
+          </button>
+          <button
+            onClick={() => navigate("/mozo/qr")}
+            style={estilos.btnVolver}
+          >
+            Generar QR
           </button>
           <button onClick={() => navigate("/menu")} style={estilos.btnVolver}>
             ← Salir
