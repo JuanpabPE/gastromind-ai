@@ -4,8 +4,8 @@ import {
   obtenerResumen,
 } from "../historial_consumo/historialApi";
 import { useNavigate } from "react-router-dom";
-import BotonChat from "../chatbot_nutricionista/BotonChat";
-import TarjetaPuntos from "../fidelizacion/TarjetaPuntos";
+import BotonChat from "../chatbot_nutricionista/botonChat";
+import TarjetaPuntos from "../fidelizacion/tarjetaPuntos";
 import { tema } from "../compartido/estilos/tema";
 import logoTanta from "../assets/images/logo_tanta.png";
 

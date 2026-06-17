@@ -1,5 +1,5 @@
 import { useRecomendaciones } from "./useRecomendaciones";
-import TarjetaRecomendacion from "./TarjetaRecomendacion";
+import TarjetaRecomendacion from "./tarjetaRecomendacion";
 
 export default function PanelRecomendaciones({ onVerFicha }) {
   const { recomendaciones, cargando, error } = useRecomendaciones();

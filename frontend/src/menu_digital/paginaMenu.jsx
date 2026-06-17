@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { useMenu } from "./useMenu";
-import TarjetaPlato from "./TarjetaPlato";
-import FiltrosMenu from "./FiltrosMenu";
-import FichaNutricional from "./FichaNutricional";
-import PanelRecomendaciones from "../recomendaciones/PanelRecomendaciones";
-import BotonChat from "../chatbot_nutricionista/BotonChat";
+import TarjetaPlato from "./tarjetaPlato";
+import FiltrosMenu from "./filtrosMenu";
+import FichaNutricional from "./fichaNutricional";
+import PanelRecomendaciones from "../recomendaciones/panelRecomendaciones";
+import BotonChat from "../chatbot_nutricionista/botonChat";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../compartido/api/cliente";
 import { tema } from "../compartido/estilos/tema";

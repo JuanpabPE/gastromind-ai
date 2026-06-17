@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import VentanaChat from "./VentanaChat";
+import VentanaChat from "./ventanaChat";
 import { useChat } from "./useChat";
 
 export default function BotonChat() {

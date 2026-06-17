@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import BurbujaMensaje from "./BurbujaMensaje";
-
+import BurbujaMensaje from "./burbujaMensaje";
 const SUGERENCIAS = [
   "Que me recomiendas para hoy?",
   "Cual es el plato mas ligero?",
