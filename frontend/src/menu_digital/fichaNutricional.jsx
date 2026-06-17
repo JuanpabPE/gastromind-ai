@@ -1,4 +1,3 @@
-import { registrarConsumo } from "../historial_consumo/historialApi";
 import { useState, useEffect } from "react";
 import { supabase } from "../compartido/api/cliente";
 
@@ -13,7 +12,6 @@ const SEDES = [
 
 export default function FichaNutricional({ plato, onCerrar }) {
   const [alerta, setAlerta] = useState(null);
-  const [sede, setSede] = useState("Surco - Av. Primavera");
 
   useEffect(() => {
     async function verificar() {
@@ -162,57 +160,6 @@ export default function FichaNutricional({ plato, onCerrar }) {
                 <span style={estilos.apto}>Hipertensión</span>
               )}
             </div>
-          </div>
-        </div>
-
-        {/* Botón fijo en la parte baja */}
-        <div style={estilos.botonesContenedor}>
-          <div
-            style={{
-              marginTop: "1.5rem",
-              paddingTop: "1rem",
-              borderTop: "1px solid #f0f0f0",
-            }}
-          >
-            <label
-              style={{
-                fontSize: "0.82rem",
-                fontWeight: "600",
-                color: "#555",
-                display: "block",
-                marginBottom: "6px",
-              }}
-            >
-              En qué sede estás
-            </label>
-            <select
-              value={sede}
-              onChange={(e) => setSede(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "8px 12px",
-                borderRadius: "8px",
-                border: "1px solid #e0e0e0",
-                fontSize: "0.9rem",
-                marginBottom: "10px",
-                backgroundColor: "#fff",
-              }}
-            >
-              {SEDES.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-            <button
-              onClick={async () => {
-                await registrarConsumo({ ...plato, sede });
-                alert(`"${plato.nombre}" registrado en tu historial — ${sede}`);
-              }}
-              style={estilos.btnPedir}
-            >
-              + Registrar en mi historial
-            </button>
           </div>
         </div>
       </div>
