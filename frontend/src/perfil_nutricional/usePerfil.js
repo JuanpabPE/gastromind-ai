@@ -25,7 +25,9 @@ export function usePerfil() {
     // 2. Llamar al endpoint del backend (NUEVO FLUJO)
     // El backend se encarga del signup + perfil
     try {
-      const response = await fetch("http://localhost:8000/auth/registro", {
+      const API = import.meta.env.VITE_API_URL || "http://localhost:8000";
+      // ...
+      const response = await fetch(`${API}/auth/registro`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
