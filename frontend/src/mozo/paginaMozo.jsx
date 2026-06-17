@@ -71,8 +71,9 @@ export default function PaginaMozo() {
     const res = await fetch(`${API}/premios/`, {
       headers: { Authorization: `Bearer ${session?.access_token}` },
     });
+    if (!res.ok) return; // si falla no rompe el resto
     const data = await res.json();
-    setPremios(data);
+    if (Array.isArray(data)) setPremios(data);
   }
 
   async function handleAbrirMesa(mesa) {

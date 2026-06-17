@@ -10,7 +10,7 @@ const SEDES = [
   "Aeropuerto",
 ];
 
-const BASE_URL = import.meta.env.VITE_APP_URL || "http://localhost:5174";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5174";
 
 export default function GeneradorQR() {
   const [sede, setSede] = useState(SEDES[0]);
