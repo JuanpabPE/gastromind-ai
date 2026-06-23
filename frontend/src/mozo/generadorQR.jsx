@@ -20,21 +20,21 @@ export default function GeneradorQR() {
 
   function imprimirQR(numero) {
     const url = `${BASE_URL}/mesa/${encodeURIComponent(sede)}/${numero}`;
+    const imgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(url)}`;
     const ventana = window.open("", "_blank");
     ventana.document.write(`
-      <html>
-        <head><title>QR Mesa ${numero} - ${sede}</title></head>
-        <body style="text-align:center; padding:40px; font-family:sans-serif">
-          <h2>Tanta — ${sede}</h2>
-          <h1 style="font-size:4rem">Mesa ${numero}</h1>
-          <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(url)}" />
-          <p style="margin-top:16px; color:#888; font-size:0.85rem">Escanea para unirte al pedido y ver tu perfil nutricional</p>
-          <p style="color:#ccc; font-size:0.75rem">${url}</p>
-        </body>
-      </html>
-    `);
+    <html>
+      <head><title>QR Mesa ${numero} - ${sede}</title></head>
+      <body style="text-align:center; padding:40px; font-family:sans-serif">
+        <h2>Tanta — ${sede}</h2>
+        <h1 style="font-size:4rem">Mesa ${numero}</h1>
+        <img src="${imgUrl}" onload="window.print()" />
+        <p style="margin-top:16px; color:#888; font-size:0.85rem">Escanea para unirte al pedido</p>
+        <p style="color:#ccc; font-size:0.75rem">${url}</p>
+      </body>
+    </html>
+  `);
     ventana.document.close();
-    ventana.print();
   }
 
   return (

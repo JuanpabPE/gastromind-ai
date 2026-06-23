@@ -126,7 +126,7 @@ const estilos = {
     overflow: "hidden",
   },
   logoExterno: {
-    position: "fixed",
+    position: "static",
     top: "2rem",
     left: "2rem",
     width: "100px",
