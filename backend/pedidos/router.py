@@ -89,3 +89,9 @@ async def unirse(mesa_id: str, request: Request):
     body = await request.json()
     data = await repositorio.unirse_a_pedido(mesa_id, usuario_id, body.get("nombre", ""))
     return data
+
+@router.post("/mesas/{mesa_id}/liberar")
+async def liberar_mesa(mesa_id: str, request: Request):
+    await get_usuario_id(request)
+    await repositorio.liberar_mesa(mesa_id)
+    return {"ok": True}

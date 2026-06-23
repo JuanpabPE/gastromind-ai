@@ -167,3 +167,11 @@ async def obtener_mesa_por_numero_sede(numero: int, sede: str) -> dict:
         .single()\
         .execute()
     return response.data
+
+async def liberar_mesa(mesa_id: str):
+    mesa = supabase.table("mesas").select("pedido_activo_id").eq("id", mesa_id).single().execute()
+    pedido_id = mesa.data.get("pedido_activo_id")
+    if pedido_id:
+        supabase.table("pedidos").update({"estado": "cancelado"}).eq("id", pedido_id).execute()
+        supabase.table("pedido_items").delete().eq("pedido_id", pedido_id).execute()
+    supabase.table("mesas").update({"estado": "libre", "pedido_activo_id": None}).eq("id", mesa_id).execute()
