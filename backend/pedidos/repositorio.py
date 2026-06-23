@@ -124,6 +124,7 @@ async def finalizar_pedido(pedido_id: str, mesa_id: str):
         .execute()
 
 async def unirse_a_pedido(mesa_id: str, usuario_id: str, nombre: str) -> dict:
+    
     mesa = supabase.table("mesas")\
         .select("pedido_activo_id, estado")\
         .eq("id", mesa_id)\
@@ -150,8 +151,12 @@ async def unirse_a_pedido(mesa_id: str, usuario_id: str, nombre: str) -> dict:
             .update({"clientes_unidos": clientes})\
             .eq("id", pedido_id)\
             .execute()
+    print(f"unirse: mesa_id={mesa_id}, usuario_id={usuario_id}, nombre={nombre}")
+    print(f"pedido_id={pedido_id}, clientes actuales={clientes}")
 
     return mesa.data
+
+
 
 async def obtener_mesa_por_numero_sede(numero: int, sede: str) -> dict:
     print(f"Buscando mesa: sede='{sede}', numero={numero}")
