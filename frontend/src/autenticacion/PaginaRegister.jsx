@@ -132,9 +132,15 @@ export default function PaginaRegister() {
   return (
     <div style={estilos.pagina}>
       {/* Logo TANTA afuera del formulario, esquina superior izquierda */}
-      <img src={logoTanta} alt="TANTA Logo" style={estilos.logoExterno} />
 
       <div style={estilos.tarjeta}>
+        <div style={{ textAlign: "center", marginBottom: "1rem" }}>
+          <img
+            src={logoTanta}
+            alt="TANTA"
+            style={{ height: "60px", width: "auto" }}
+          />
+        </div>
         <h1 style={estilos.titulo}>Crea tu cuenta</h1>
         <p style={estilos.subtitulo}>
           en <span style={estilos.spanTanta}>TANTA Restaurante</span>
@@ -337,15 +343,7 @@ const estilos = {
     position: "relative",
     overflow: "hidden",
   },
-  logoExterno: {
-    position: "fixed",
-    top: "2rem",
-    left: "2rem",
-    width: "100px",
-    height: "auto",
-    objectFit: "contain",
-    zIndex: 10,
-  },
+
   tarjeta: {
     backgroundColor: "#FAFBFC",
     padding: "3.5rem 2.5rem",
