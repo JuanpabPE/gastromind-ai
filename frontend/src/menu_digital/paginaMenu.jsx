@@ -16,7 +16,9 @@ export default function PaginaMenu() {
   const [esAdmin, setEsAdmin] = useState(false);
   const [esMozo, setEsMozo] = useState(false);
   const [nombreUsuario, setNombreUsuario] = useState("");
+  const [codigoCliente, setCodigoCliente] = useState("");
   const [verificandoSesion, setVerificandoSesion] = useState(true);
+  const [menuAbierto, setMenuAbierto] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,12 +32,13 @@ export default function PaginaMenu() {
       }
       const { data } = await supabase
         .from("perfiles")
-        .select("nombre, es_admin, es_mozo")
+        .select("nombre, es_admin, es_mozo, codigo_cliente")
         .eq("usuario_id", user.id)
         .single();
       setEsAdmin(data?.es_admin || false);
       setEsMozo(data?.es_mozo || false);
       setNombreUsuario(data?.nombre?.split(" ")[0] || "");
+      setCodigoCliente(data?.codigo_cliente || "");
       setVerificandoSesion(false);
     }
     verificar();
@@ -59,23 +62,69 @@ export default function PaginaMenu() {
       }}
     >
       {/* Header */}
-      <div style={estilos.header}>
-        <div style={estilos.headerContenido} className="menu-header-contenido">
-          <div style={estilos.logoArea}>
+      <div style={{ backgroundColor: "#E91E63", color: "#fff" }}>
+        <div
+          style={{
+            maxWidth: "1200px",
+            margin: "0 auto",
+            padding: "1rem 1.5rem",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          {/* Logo */}
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <img
               src={logoTanta}
               alt="TANTA Logo"
-              style={{ height: "48px", width: "auto" }}
+              style={{ height: "40px", width: "auto" }}
             />
             <div>
-              <h1 style={estilos.logoTitulo}>Tanta</h1>
-              <p style={estilos.logoSub}>Carta Digital</p>
+              <h1
+                style={{
+                  fontFamily: tema.fuenteTitulo,
+                  fontSize: "1.3rem",
+                  fontWeight: "700",
+                  margin: 0,
+                  color: "#fff",
+                }}
+              >
+                Tanta
+              </h1>
+              <p
+                style={{
+                  fontSize: "0.65rem",
+                  margin: 0,
+                  color: "rgba(255,255,255,0.7)",
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Carta Digital
+              </p>
             </div>
           </div>
 
-          <div style={estilos.headerAcciones} className="menu-header-acciones">
+          {/* Desktop nav */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              flexWrap: "wrap",
+            }}
+            className="menu-header-acciones"
+          >
             {nombreUsuario && (
-              <span style={estilos.saludo}>Bienvenido, {nombreUsuario}</span>
+              <span
+                style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.9)" }}
+              >
+                {nombreUsuario} ·{" "}
+                <span style={{ fontFamily: "monospace" }}>
+                  #{codigoCliente}
+                </span>
+              </span>
             )}
             <button
               onClick={() => navigate("/dashboard")}
@@ -104,7 +153,7 @@ export default function PaginaMenu() {
                   borderColor: tema.grisOscuro,
                 }}
               >
-                Administracion
+                Admin
               </button>
             )}
             <button
@@ -118,47 +167,167 @@ export default function PaginaMenu() {
               Cerrar Sesión
             </button>
           </div>
+
+          {/* Mobile hamburger */}
+          <button
+            onClick={() => setMenuAbierto(!menuAbierto)}
+            style={{
+              display: "none",
+              background: "none",
+              border: "1px solid rgba(255,255,255,0.4)",
+              color: "#fff",
+              borderRadius: "6px",
+              padding: "6px 10px",
+              cursor: "pointer",
+              fontSize: "1.1rem",
+            }}
+            className="menu-hamburger"
+          >
+            ☰
+          </button>
         </div>
 
-        {/* Instrucciones de uso */}
-        <div style={estilos.instrucciones}>
-          <div style={estilos.instruccionItem}>
-            <span style={estilos.instruccionNumero}>1</span>
-            <span>
-              Revisa tus recomendaciones personalizadas segun tu perfil de salud
-            </span>
+        {/* Mobile dropdown */}
+        {menuAbierto && (
+          <div
+            style={{
+              backgroundColor: "#c2185b",
+              padding: "1rem 1.5rem",
+              display: "flex",
+              flexDirection: "column",
+              gap: "8px",
+            }}
+            className="menu-mobile-nav"
+          >
+            {nombreUsuario && (
+              <span
+                style={{
+                  fontSize: "0.8rem",
+                  color: "rgba(255,255,255,0.9)",
+                  paddingBottom: "8px",
+                  borderBottom: "1px solid rgba(255,255,255,0.2)",
+                }}
+              >
+                {nombreUsuario} ·{" "}
+                <span style={{ fontFamily: "monospace" }}>
+                  #{codigoCliente}
+                </span>
+              </span>
+            )}
+            <button
+              onClick={() => {
+                navigate("/dashboard");
+                setMenuAbierto(false);
+              }}
+              style={estilos.btnMobile}
+            >
+              Mi Dashboard
+            </button>
+            {esMozo && (
+              <button
+                onClick={() => {
+                  navigate("/mozo");
+                  setMenuAbierto(false);
+                }}
+                style={estilos.btnMobile}
+              >
+                Panel Mozo
+              </button>
+            )}
+            {esAdmin && (
+              <button
+                onClick={() => {
+                  navigate("/admin");
+                  setMenuAbierto(false);
+                }}
+                style={estilos.btnMobile}
+              >
+                Admin
+              </button>
+            )}
+            <button
+              onClick={handleLogout}
+              style={{
+                ...estilos.btnMobile,
+                backgroundColor: "#C2185B",
+                borderColor: "#C2185B",
+              }}
+            >
+              Cerrar Sesión
+            </button>
           </div>
-          <div style={estilos.instruccionItem}>
-            <span style={estilos.instruccionNumero}>2</span>
-            <span>
-              Usa los filtros para explorar la carta por categoria, calorias o
-              proteinas
-            </span>
-          </div>
-          <div style={estilos.instruccionItem}>
-            <span style={estilos.instruccionNumero}>3</span>
-            <span>
-              Haz clic en cualquier plato para ver su ficha nutricional completa
-            </span>
-          </div>
-          <div style={estilos.instruccionItem}>
-            <span style={estilos.instruccionNumero}>4</span>
-            <span>
-              Consulta al nutricionista virtual si tienes dudas sobre algun
-              plato
-            </span>
+        )}
+
+        {/* Instrucciones */}
+        <div
+          style={{ backgroundColor: "#3d3d3d", padding: "1rem 1.5rem" }}
+          className="menu-instrucciones"
+        >
+          <div
+            style={{
+              maxWidth: "1200px",
+              margin: "0 auto",
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+              gap: "1rem",
+            }}
+          >
+            {[
+              "Revisa tus recomendaciones personalizadas según tu perfil de salud",
+              "Usa los filtros para explorar la carta por categoría, calorías o proteínas",
+              "Haz clic en cualquier plato para ver su ficha nutricional completa",
+              "Consulta al nutricionista virtual si tienes dudas sobre algún plato",
+            ].map((texto, i) => (
+              <div
+                key={i}
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: "10px",
+                  fontSize: "0.85rem",
+                  color: "rgba(255,255,255,0.95)",
+                  lineHeight: "1.5",
+                }}
+              >
+                <span
+                  style={{
+                    width: "22px",
+                    height: "22px",
+                    borderRadius: "50%",
+                    backgroundColor: "#E91E63",
+                    color: "#fff",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "0.7rem",
+                    fontWeight: "700",
+                    flexShrink: 0,
+                  }}
+                >
+                  {i + 1}
+                </span>
+                <span>{texto}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
-      <div style={estilos.contenedor}>
+      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "1.5rem" }}>
         {/* Recomendaciones */}
         <PanelRecomendaciones onVerFicha={setPlatoSeleccionado} />
 
         <div style={estilos.layout} className="menu-layout">
           {/* Sidebar */}
           <div style={estilos.sidebar} className="menu-sidebar">
-            <div style={estilos.filtrosTitulo}>
+            <div
+              style={{
+                backgroundColor: "#fff",
+                borderRadius: "10px 10px 0 0",
+                padding: "1rem 1.2rem 0.5rem",
+                borderBottom: `2px solid ${tema.dorado}`,
+              }}
+            >
               <h3
                 style={{
                   fontFamily: tema.fuenteTitulo,
@@ -229,11 +398,33 @@ export default function PaginaMenu() {
             ) : (
               Object.entries(platosPorCategoria).map(([cat, items]) => (
                 <div key={cat} style={{ marginBottom: "2.5rem" }}>
-                  <div style={estilos.categoriaHeader}>
-                    <h2 style={estilos.categoriaTitulo}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "1rem",
+                      marginBottom: "1rem",
+                    }}
+                  >
+                    <h2
+                      style={{
+                        fontFamily: tema.fuenteTitulo,
+                        fontSize: "1.2rem",
+                        fontWeight: "700",
+                        color: tema.negro,
+                        margin: 0,
+                        whiteSpace: "nowrap",
+                      }}
+                    >
                       {limpiarEmojis(cat)}
                     </h2>
-                    <div style={estilos.categoriaLinea} />
+                    <div
+                      style={{
+                        flex: 1,
+                        height: "1px",
+                        backgroundColor: tema.dorado,
+                      }}
+                    />
                   </div>
                   <div style={estilos.grid}>
                     {items.map((plato) => (
@@ -258,7 +449,6 @@ export default function PaginaMenu() {
           onCerrar={() => setPlatoSeleccionado(null)}
         />
       )}
-
       <BotonChat />
     </div>
   );
@@ -279,113 +469,38 @@ function agruparPorCategoria(platos) {
 }
 
 const estilos = {
-  header: { backgroundColor: "#E91E63", color: "#fff" },
-  headerContenido: {
-    maxWidth: "1200px",
-    margin: "0 auto",
-    padding: "1.2rem 2rem",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  logoArea: { display: "flex", alignItems: "center", gap: "12px" },
-  logoTitulo: {
-    fontFamily: tema.fuenteTitulo,
-    fontSize: "1.6rem",
-    fontWeight: "700",
-    margin: 0,
-    color: "#fff",
-  },
-  logoSub: {
-    fontSize: "0.75rem",
-    margin: 0,
-    color: "rgba(255,255,255,0.7)",
-    letterSpacing: "0.1em",
-    textTransform: "uppercase",
-  },
-  headerAcciones: { display: "flex", alignItems: "center", gap: "10px" },
-  saludo: {
-    fontSize: "0.85rem",
-    color: "rgba(255,255,255,0.9)",
-    marginRight: "8px",
-  },
   btnHeader: {
-    padding: "7px 16px",
+    padding: "7px 14px",
     borderRadius: "6px",
     backgroundColor: "transparent",
     color: "#fff",
     border: "1px solid rgba(255,255,255,0.4)",
     cursor: "pointer",
-    fontSize: "0.82rem",
+    fontSize: "0.78rem",
     fontFamily: tema.fuenteCuerpo,
   },
-  instrucciones: {
-    backgroundColor: "#3d3d3d",
-    padding: "1.5rem 2rem",
-    maxWidth: "1200px",
-    margin: "0 auto",
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-    gap: "1.5rem",
-  },
-  instruccionItem: {
-    display: "flex",
-    alignItems: "flex-start",
-    gap: "12px",
-    fontSize: "0.9rem",
-    color: "rgba(255,255,255,0.95)",
-    lineHeight: "1.5",
-  },
-  instruccionNumero: {
-    width: "24px",
-    height: "24px",
-    borderRadius: "50%",
-    backgroundColor: "#E91E63",
+  btnMobile: {
+    padding: "10px 16px",
+    borderRadius: "8px",
+    backgroundColor: "transparent",
     color: "#fff",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "0.75rem",
-    fontWeight: "700",
-    flexShrink: 0,
+    border: "1px solid rgba(255,255,255,0.4)",
+    cursor: "pointer",
+    fontSize: "0.9rem",
+    textAlign: "left",
   },
-  contenedor: { maxWidth: "1200px", margin: "0 auto", padding: "2rem" },
   layout: {
     display: "grid",
     gridTemplateColumns: "240px 1fr",
     gap: "1.5rem",
     alignItems: "start",
-    "@media (max-width: 768px)": {
-      gridTemplateColumns: "1fr",
-    },
   },
   sidebar: { position: "sticky", top: "1.5rem" },
-  filtrosTitulo: {
-    backgroundColor: "#fff",
-    borderRadius: "10px 10px 0 0",
-    padding: "1rem 1.2rem 0.5rem",
-    borderBottom: `2px solid ${tema.dorado}`,
-  },
   grid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
     gap: "1rem",
   },
-  categoriaHeader: {
-    display: "flex",
-    alignItems: "center",
-    gap: "1rem",
-    marginBottom: "1rem",
-  },
-  categoriaTitulo: {
-    fontFamily: tema.fuenteTitulo,
-    fontSize: "1.2rem",
-    fontWeight: "700",
-    color: tema.negro,
-    margin: 0,
-    whiteSpace: "nowrap",
-  },
-  categoriaLinea: { flex: 1, height: "1px", backgroundColor: tema.dorado },
   estadoVacio: {
     textAlign: "center",
     padding: "4rem 2rem",

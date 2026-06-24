@@ -34,6 +34,15 @@ async def canjear_premio(request: Request):
     if puntos_actuales < puntos_requeridos:
         raise HTTPException(status_code=400, detail=f"Puntos insuficientes. Tiene {puntos_actuales}, necesita {puntos_requeridos}")
 
+    canje_previo = supabase.table("canjes")\
+        .select("id")\
+        .eq("usuario_id", usuario_id)\
+        .eq("premio_id", premio_id)\
+     .execute()
+
+    if canje_previo.data:
+        raise HTTPException(status_code=400, detail="Ya canjeaste este premio anteriormente.")
+
     # Descontar puntos
     supabase.table("perfiles").update({"puntos_fidelidad": puntos_actuales - puntos_requeridos}).eq("usuario_id", usuario_id).execute()
 

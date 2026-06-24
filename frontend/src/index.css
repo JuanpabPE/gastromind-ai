@@ -136,3 +136,20 @@ code {
     gap: 10px;
   }
 }
+@media (max-width: 768px) {
+  .menu-header-acciones {
+    display: none !important;
+  }
+  .menu-hamburger {
+    display: flex !important;
+  }
+  .menu-layout {
+    grid-template-columns: 1fr !important;
+  }
+  .menu-sidebar {
+    display: none !important;
+  }
+  .menu-instrucciones > div {
+    grid-template-columns: 1fr !important;
+  }
+}
