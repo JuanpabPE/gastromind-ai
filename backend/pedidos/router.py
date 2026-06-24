@@ -95,3 +95,10 @@ async def liberar_mesa(mesa_id: str, request: Request):
     await get_usuario_id(request)
     await repositorio.liberar_mesa(mesa_id)
     return {"ok": True}
+
+@router.post("/mesas/{mesa_id}/bloquear")
+async def bloquear(mesa_id: str, request: Request):
+    await get_usuario_id(request)
+    body = await request.json()
+    await repositorio.bloquear_mesa(mesa_id, body.get("bloquear", True))
+    return {"ok": True}

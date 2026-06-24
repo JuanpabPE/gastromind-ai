@@ -43,12 +43,13 @@ async def registrar_usuario(datos: RegistroRequest):
         
         usuario_id = signup_response.user.id
         requiere_verificacion = signup_response.session is None
-        
+        codigo_cliente = usuario_id.replace("-", "")[:8].upper()
         # 2. Guardar perfil en tabla "perfiles"
         # (RLS permite INSERT sin autenticación durante registro)
         perfil_data = {
             "usuario_id": usuario_id,
             "nombre": datos.nombre,
+            "codigo_cliente": codigo_cliente,
             "fecha_nacimiento": datos.fecha_nacimiento,
             "alergias": datos.alergias,
             "intolerancias": datos.intolerancias,

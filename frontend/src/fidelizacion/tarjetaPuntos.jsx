@@ -50,7 +50,7 @@ export default function TarjetaPuntos() {
       } = await supabase.auth.getUser();
       const { data } = await supabase
         .from("perfiles")
-        .select("nombre, puntos_fidelidad")
+        .select("nombre, puntos_fidelidad, codigo_cliente")
         .eq("usuario_id", user.id)
         .single();
       setPerfil(data);
@@ -80,6 +80,17 @@ export default function TarjetaPuntos() {
       <div style={estilos.cabecera}>
         <div style={estilos.infoUsuario}>
           <p style={estilos.saludo}>Hola, {perfil.nombre?.split(" ")[0]}</p>
+          <p
+            style={{
+              fontSize: "0.75rem",
+              color: tema.grisMedio,
+              margin: "2px 0 0",
+              fontFamily: "monospace",
+              letterSpacing: "0.1em",
+            }}
+          >
+            ID: #{perfil.codigo_cliente || "—"}
+          </p>
           <p style={estilos.subtitulo}>Programa de fidelizacion Tanta</p>
         </div>
         <div

@@ -175,3 +175,9 @@ async def liberar_mesa(mesa_id: str):
         supabase.table("pedidos").update({"estado": "cancelado"}).eq("id", pedido_id).execute()
         supabase.table("pedido_items").delete().eq("pedido_id", pedido_id).execute()
     supabase.table("mesas").update({"estado": "libre", "pedido_activo_id": None}).eq("id", mesa_id).execute()
+
+async def bloquear_mesa(mesa_id: str, bloquear: bool):
+    supabase.table("mesas")\
+        .update({"bloqueada": bloquear})\
+        .eq("id", mesa_id)\
+        .execute()

@@ -108,13 +108,15 @@ export default function PaginaMozo() {
     setMensajeCanje(null);
     const { data, error } = await supabase
       .from("perfiles")
-      .select("usuario_id, nombre, puntos_fidelidad")
-      .ilike("nombre", `%${emailBusqueda}%`)
+      .select("usuario_id, nombre, puntos_fidelidad, codigo_cliente")
+      .or(
+        `nombre.ilike.%${emailBusqueda}%,codigo_cliente.ilike.%${emailBusqueda}%`,
+      )
       .limit(5);
     if (error || !data?.length) {
       setMensajeCanje({
         tipo: "error",
-        texto: "Cliente no encontrado. Busca por nombre.",
+        texto: "Cliente no encontrado. Busca por nombre o por id.",
       });
       setBuscando(false);
       return;

@@ -41,6 +41,11 @@ export default function PaginaMesaQR() {
       const mesaData = await res.json();
       setMesa(mesaData);
 
+      if (mesaData.bloqueada) {
+        setEstado("bloqueada");
+        return;
+      }
+
       if (mesaData.estado !== "ocupada") {
         // El cliente abre la mesa automáticamente
         const token2 = (await supabase.auth.getSession()).data.session
@@ -87,6 +92,13 @@ export default function PaginaMesaQR() {
       <div style={estilos.tarjeta}>
         <div style={estilos.logo}>🍽️</div>
         <h1 style={estilos.titulo}>Tanta</h1>
+
+        {estado === "bloqueada" && (
+          <p style={{ ...estilos.texto, color: "#e53e3e" }}>
+            Esta mesa está temporalmente bloqueada. El mozo la habilitará en
+            breve.
+          </p>
+        )}
 
         {estado === "cargando" && (
           <p style={estilos.texto}>Conectando con tu mesa...</p>

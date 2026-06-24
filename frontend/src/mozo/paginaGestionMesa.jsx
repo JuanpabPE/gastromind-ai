@@ -79,6 +79,12 @@ export default function PaginaGestionMesa() {
 
   async function handleAgregarPlato(plato) {
     if (!pedido) return;
+    if (!clienteSeleccionado) {
+      alert(
+        "Selecciona un cliente antes de agregar el plato, o elige 'Sin asignar' para platos compartidos",
+      );
+      return;
+    }
     const puntos =
       plato.apto_diabetes || plato.apto_vegetariano || plato.calorias < 400
         ? 20
