@@ -133,4 +133,18 @@ code {
   .menu-instrucciones > div {
     grid-template-columns: 1fr !important;
   }
+  @media (max-width: 768px) {
+    /* Dashboard header */
+    .dashboard-header {
+      flex-wrap: wrap !important;
+      gap: 10px !important;
+    }
+
+    /* Ficha nutricional modal */
+    .ficha-modal {
+      width: calc(100% - 1rem) !important;
+      max-height: 88vh !important;
+      margin: 0.5rem !important;
+    }
+  }
 }

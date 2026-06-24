@@ -283,6 +283,8 @@ const estilos = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+    flexWrap: "wrap",
+    gap: "10px",
   },
   logoArea: { display: "flex", alignItems: "center", gap: "12px" },
   logoCirculo: {
