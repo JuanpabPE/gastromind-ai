@@ -2,46 +2,10 @@ import { useState, useEffect } from "react";
 import { supabase } from "../compartido/api/cliente";
 import { tema } from "../compartido/estilos/tema";
 
-const RECOMPENSAS = [
-  {
-    puntos: 50,
-    titulo: "Cafe gratis",
-    descripcion: "Un cafe espresso o americano en tu proxima visita",
-  },
-  {
-    puntos: 100,
-    titulo: "Postre de cortesia",
-    descripcion: "Elige entre suspiro a la limena, pie de limon o tres leches",
-  },
-  {
-    puntos: 200,
-    titulo: "Entrada para dos",
-    descripcion: "Una entrada a elegir de nuestra carta para compartir",
-  },
-  {
-    puntos: 350,
-    titulo: "Almuerzo ejecutivo",
-    descripcion: "Menu completo: entrada, plato de fondo y bebida",
-  },
-  {
-    puntos: 500,
-    titulo: "Cena para dos",
-    descripcion: "Cena completa para dos personas en cualquier sede de Tanta",
-  },
-  {
-    puntos: 800,
-    titulo: "Chef experience",
-    descripcion: "Visita a la cocina y menu de degustacion personalizado",
-  },
-  {
-    puntos: 1000,
-    titulo: "Socio Tanta Premium",
-    descripcion: "10% de descuento permanente en todas tus visitas por 6 meses",
-  },
-];
-
 export default function TarjetaPuntos() {
   const [perfil, setPerfil] = useState(null);
+  const [canjes, setCanjes] = useState([]);
+  const [premiosDB, setPremiosDB] = useState([]);
 
   useEffect(() => {
     async function cargar() {
@@ -54,6 +18,19 @@ export default function TarjetaPuntos() {
         .eq("usuario_id", user.id)
         .single();
       setPerfil(data);
+
+      const { data: canjesData } = await supabase
+        .from("canjes")
+        .select("premio_id")
+        .eq("usuario_id", user.id);
+      setCanjes(canjesData || []);
+
+      const { data: premiosData } = await supabase
+        .from("premios")
+        .select("*")
+        .eq("activo", true)
+        .order("puntos_requeridos");
+      setPremiosDB(premiosData || []);
     }
     cargar();
   }, []);
@@ -71,14 +48,19 @@ export default function TarjetaPuntos() {
     nivel === "Bronce" ? 200 : nivel === "Plata" ? 500 : 1000;
   const progreso = Math.min((puntos / puntosParaSiguiente) * 100, 100);
 
-  const proxima = RECOMPENSAS.find((r) => r.puntos > puntos);
-  const obtenidas = RECOMPENSAS.filter((r) => r.puntos <= puntos);
+  const idsCanjados = canjes.map((c) => c.premio_id);
+  const proxima = premiosDB.find(
+    (r) => r.puntos_requeridos > puntos && !idsCanjados.includes(r.id),
+  );
+  const obtenidas = premiosDB.filter(
+    (r) => r.puntos_requeridos <= puntos && !idsCanjados.includes(r.id),
+  );
 
   return (
     <div style={estilos.contenedor}>
-      {/* Cabecera de puntos */}
+      {/* Cabecera */}
       <div style={estilos.cabecera}>
-        <div style={estilos.infoUsuario}>
+        <div>
           <p style={estilos.saludo}>Hola, {perfil.nombre?.split(" ")[0]}</p>
           <p
             style={{
@@ -109,7 +91,7 @@ export default function TarjetaPuntos() {
         <span style={estilos.puntosLabel}>puntos acumulados</span>
       </div>
 
-      {/* Barra de progreso */}
+      {/* Barra de nivel */}
       <div style={estilos.barraContenedor}>
         <div
           style={{
@@ -131,11 +113,13 @@ export default function TarjetaPuntos() {
           <p style={estilos.proximaTitulo}>Proxima recompensa</p>
           <div style={estilos.proximaContenido}>
             <div style={{ flex: 1 }}>
-              <p style={estilos.proximaNombre}>{proxima.titulo}</p>
+              <p style={estilos.proximaNombre}>{proxima.nombre}</p>
               <p style={estilos.proximaDesc}>{proxima.descripcion}</p>
             </div>
             <div style={estilos.proximaPuntos}>
-              <span style={estilos.proximaPuntosNum}>{proxima.puntos}</span>
+              <span style={estilos.proximaPuntosNum}>
+                {proxima.puntos_requeridos}
+              </span>
               <span style={estilos.proximaPuntosLabel}>pts</span>
             </div>
           </div>
@@ -143,7 +127,7 @@ export default function TarjetaPuntos() {
             <div
               style={{
                 ...estilos.barraProgreso,
-                width: `${Math.min((puntos / proxima.puntos) * 100, 100)}%`,
+                width: `${Math.min((puntos / proxima.puntos_requeridos) * 100, 100)}%`,
                 backgroundColor: tema.rojo,
               }}
             />
@@ -156,53 +140,72 @@ export default function TarjetaPuntos() {
               textAlign: "right",
             }}
           >
-            {puntos} / {proxima.puntos} puntos
+            {puntos} / {proxima.puntos_requeridos} puntos
           </p>
         </div>
       )}
 
-      {/* Recompensas obtenidas */}
+      {/* Recompensas disponibles para canjear */}
       {obtenidas.length > 0 && (
         <div style={estilos.obtenidas}>
           <p style={estilos.obtenidaSTitulo}>
             Recompensas disponibles para canjear
           </p>
-          {obtenidas.map((r, i) => (
-            <div key={i} style={estilos.recompensaItem}>
+          {obtenidas.map((r) => (
+            <div key={r.id} style={estilos.recompensaItem}>
               <div style={{ flex: 1 }}>
-                <p style={estilos.recompensaNombre}>{r.titulo}</p>
+                <p style={estilos.recompensaNombre}>{r.nombre}</p>
                 <p style={estilos.recompensaDesc}>{r.descripcion}</p>
               </div>
-              <span style={estilos.badgeCanjeable}>{r.puntos} pts</span>
+              <span style={estilos.badgeCanjeable}>
+                {r.puntos_requeridos} pts
+              </span>
             </div>
           ))}
+          <p
+            style={{
+              fontSize: "0.75rem",
+              color: tema.grisMedio,
+              marginTop: "8px",
+            }}
+          >
+            Muestra tu ID al mozo para canjear:{" "}
+            <strong style={{ fontFamily: "monospace" }}>
+              #{perfil.codigo_cliente}
+            </strong>
+          </p>
         </div>
       )}
 
-      {/* Todas las recompensas */}
+      {/* Tabla de recompensas */}
       <div style={estilos.todasRecompensas}>
         <p style={estilos.todasTitulo}>Tabla de recompensas</p>
-        {RECOMPENSAS.map((r, i) => {
-          const obtenida = puntos >= r.puntos;
+        {premiosDB.map((r) => {
+          const obtenida = puntos >= r.puntos_requeridos;
+          const canjeado = idsCanjados.includes(r.id);
           return (
             <div
-              key={i}
-              style={{ ...estilos.filaRecompensa, opacity: obtenida ? 1 : 0.5 }}
+              key={r.id}
+              style={{
+                ...estilos.filaRecompensa,
+                opacity: obtenida && !canjeado ? 1 : 0.45,
+              }}
             >
               <div
                 style={{
                   ...estilos.circuloPuntos,
-                  backgroundColor: obtenida ? tema.rojo : tema.grisClaro,
+                  backgroundColor:
+                    obtenida && !canjeado ? tema.rojo : tema.grisClaro,
                 }}
               >
                 <span
                   style={{
-                    fontSize: "0.7rem",
+                    fontSize: "0.65rem",
                     fontWeight: "700",
-                    color: obtenida ? "#fff" : tema.grisMedio,
+                    color: obtenida && !canjeado ? "#fff" : tema.grisMedio,
                   }}
                 >
-                  {r.puntos}
+                  {r.puntos_requeridos}
                 </span>
               </div>
               <div style={{ flex: 1 }}>
@@ -214,7 +217,7 @@ export default function TarjetaPuntos() {
                     color: tema.negro,
                   }}
                 >
-                  {r.titulo}
+                  {r.nombre}
                 </p>
                 <p
                   style={{
@@ -226,7 +229,18 @@ export default function TarjetaPuntos() {
                   {r.descripcion}
                 </p>
               </div>
-              {obtenida && (
+              {canjeado && (
+                <span
+                  style={{
+                    ...estilos.checkObtenida,
+                    backgroundColor: "#f0f0f0",
+                    color: "#888",
+                  }}
+                >
+                  Canjeado
+                </span>
+              )}
+              {obtenida && !canjeado && (
                 <span style={estilos.checkObtenida}>Disponible</span>
               )}
             </div>
@@ -268,7 +282,6 @@ const estilos = {
     alignItems: "flex-start",
     marginBottom: "1rem",
   },
-  infoUsuario: {},
   saludo: {
     fontFamily: tema.fuenteTitulo,
     fontSize: "1.1rem",

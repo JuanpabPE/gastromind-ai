@@ -113,30 +113,11 @@ code {
 /* Responsivo GastroMind */
 @media (max-width: 768px) {
   #root {
-    width: 100%;
-    border-inline: none;
+    width: 100% !important;
+    border-inline: none !important;
+    text-align: left;
   }
 
-  /* Menú */
-  .menu-layout {
-    grid-template-columns: 1fr !important;
-  }
-
-  .menu-sidebar {
-    display: none !important;
-  }
-
-  .menu-header-acciones {
-    flex-wrap: wrap;
-    gap: 6px !important;
-  }
-
-  .menu-header-contenido {
-    flex-direction: column;
-    gap: 10px;
-  }
-}
-@media (max-width: 768px) {
   .menu-header-acciones {
     display: none !important;
   }

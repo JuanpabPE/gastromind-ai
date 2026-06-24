@@ -299,7 +299,7 @@ export default function PaginaMozo() {
             <h2 style={estilos.cardTitulo}>🎁 Canje de premios</h2>
             <div style={{ display: "flex", gap: "8px", marginBottom: "1rem" }}>
               <input
-                placeholder="Buscar cliente por nombre..."
+                placeholder="Buscar cliente por nombre o por id"
                 value={emailBusqueda}
                 onChange={(e) => setEmailBusqueda(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && buscarCliente()}
