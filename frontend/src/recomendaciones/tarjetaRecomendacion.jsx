@@ -4,16 +4,14 @@ export default function TarjetaRecomendacion({ plato, posicion, onClick }) {
       <div style={estilos.numero}>{posicion}</div>
       <div style={{ flex: 1 }}>
         <p style={estilos.nombre}>{plato.nombre}</p>
-        <p style={estilos.explicacion}>{plato.explicacion}</p>
+        <p style={estilos.explicacion}>
+          {plato.explicacion
+            .replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, "")
+            .trim()}
+        </p>
         <p style={estilos.info}>
           {plato.calorias} kcal · S/. {plato.precio}
         </p>
-      </div>
-      <div style={estilos.score}>
-        <span style={estilos.scoreNum}>
-          {Math.min(plato.score_recomendacion, 100).toFixed(0)}
-        </span>
-        <span style={estilos.scoreLbl}>match</span>
       </div>
     </div>
   );
@@ -34,7 +32,7 @@ const estilos = {
     width: "28px",
     height: "28px",
     borderRadius: "50%",
-    backgroundColor: "#c8a96e",
+    backgroundColor: "#E91E63",
     color: "#fff",
     display: "flex",
     alignItems: "center",
@@ -56,12 +54,4 @@ const estilos = {
     lineHeight: "1.4",
   },
   info: { margin: 0, fontSize: "0.75rem", color: "#aaa" },
-  score: { textAlign: "center", flexShrink: 0 },
-  scoreNum: {
-    display: "block",
-    fontSize: "1.1rem",
-    fontWeight: "700",
-    color: "#c8a96e",
-  },
-  scoreLbl: { fontSize: "0.65rem", color: "#aaa" },
 };

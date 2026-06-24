@@ -8,17 +8,44 @@ export function useAuth() {
   async function register({ email, password, nombre }) {
     setCargando(true);
     setError(null);
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { nombre } },
-    });
+
+    // Solo guardar datos temporalmente, NO registrar en Supabase aún
+    sessionStorage.setItem(
+      "registro_temporal",
+      JSON.stringify({
+        email,
+        password,
+        nombre,
+        timestamp: new Date().toISOString(),
+      }),
+    );
+
     setCargando(false);
-    if (error) {
-      setError(error.message);
+    // Retornar datos para que navegue a perfil
+    return { user: { id: "temp", email } };
+  }
+
+  async function finalizarRegistro({ email, password, nombre }) {
+    setCargando(true);
+    setError(null);
+
+    // Ahora sí, registrar en Supabase
+    const { data: signupData, error: signupError } = await supabase.auth.signUp(
+      {
+        email,
+        password,
+        options: { data: { nombre } },
+      },
+    );
+
+    if (signupError) {
+      setError(signupError.message);
+      setCargando(false);
       return null;
     }
-    return data;
+
+    setCargando(false);
+    return signupData;
   }
 
   async function login({ email, password }) {
@@ -40,5 +67,5 @@ export function useAuth() {
     await supabase.auth.signOut();
   }
 
-  return { register, login, logout, cargando, error };
+  return { register, finalizarRegistro, login, logout, cargando, error };
 }

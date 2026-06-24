@@ -19,6 +19,19 @@ export default function FiltrosMenu({ filtros, setFiltros }) {
   return (
     <div style={estilos.contenedor}>
       <div style={estilos.grupo}>
+        <label style={estilos.label}>Buscar por nombre</label>
+        <input
+          type="text"
+          placeholder="Ej: Ceviche, Lomo..."
+          value={filtros.busqueda || ""}
+          onChange={(e) =>
+            setFiltros((f) => ({ ...f, busqueda: e.target.value }))
+          }
+          style={estilos.input}
+        />
+      </div>
+
+      <div style={estilos.grupo}>
         <label style={estilos.label}>Categoría</label>
         <select
           value={filtros.categoria}
@@ -75,11 +88,11 @@ export default function FiltrosMenu({ filtros, setFiltros }) {
         <label style={estilos.label}>Preferencias</label>
         <div style={estilos.checks}>
           {[
-            { campo: "vegetariano", label: "🥗 Vegetariano" },
-            { campo: "vegano", label: "🌱 Vegano" },
-            { campo: "sinGluten", label: "🌾 Sin gluten" },
-            { campo: "diabetes", label: "💉 Diabetes" },
-            { campo: "hipertension", label: "❤️ Hipertensión" },
+            { campo: "vegetariano", label: "Vegetariano" },
+            { campo: "vegano", label: "Vegano" },
+            { campo: "sinGluten", label: "Sin gluten" },
+            { campo: "diabetes", label: "Diabetes" },
+            { campo: "hipertension", label: "Hipertensión" },
           ].map(({ campo, label }) => (
             <label key={campo} style={estilos.checkLabel}>
               <input
@@ -108,6 +121,13 @@ const estilos = {
   },
   grupo: { display: "flex", flexDirection: "column", gap: "6px" },
   label: { fontSize: "0.82rem", fontWeight: "600", color: "#555" },
+  input: {
+    padding: "8px 12px",
+    borderRadius: "8px",
+    border: "1px solid #e0e0e0",
+    fontSize: "0.9rem",
+    backgroundColor: "#fff",
+  },
   select: {
     padding: "8px 12px",
     borderRadius: "8px",

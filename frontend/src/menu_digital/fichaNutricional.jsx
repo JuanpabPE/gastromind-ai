@@ -1,4 +1,3 @@
-import { registrarConsumo } from "../historial_consumo/historialApi";
 import { useState, useEffect } from "react";
 import { supabase } from "../compartido/api/cliente";
 
@@ -13,7 +12,6 @@ const SEDES = [
 
 export default function FichaNutricional({ plato, onCerrar }) {
   const [alerta, setAlerta] = useState(null);
-  const [sede, setSede] = useState("Surco - Av. Primavera");
 
   useEffect(() => {
     async function verificar() {
@@ -39,7 +37,7 @@ export default function FichaNutricional({ plato, onCerrar }) {
       if (encontrados.length > 0) {
         setAlerta({
           tipo: "peligro",
-          mensaje: `⚠️ Este plato contiene ${encontrados.join(", ")} — ingredientes que debes evitar según tu perfil.`,
+          mensaje: `Este plato contiene ${encontrados.join(", ")} — ingredientes que debes evitar según tu perfil.`,
         });
         return;
       }
@@ -50,7 +48,7 @@ export default function FichaNutricional({ plato, onCerrar }) {
       ) {
         setAlerta({
           tipo: "precaucion",
-          mensaje: `⚠️ Este plato tiene ${plato.carbohidratos}g de carbohidratos. Consúmelo con moderación si tienes diabetes.`,
+          mensaje: `Este plato tiene ${plato.carbohidratos}g de carbohidratos. Consúmelo con moderación si tienes diabetes.`,
         });
         return;
       }
@@ -58,7 +56,7 @@ export default function FichaNutricional({ plato, onCerrar }) {
       if (perfil.enfermedades?.includes("Hipertensión") && plato.grasas > 25) {
         setAlerta({
           tipo: "precaucion",
-          mensaje: `⚠️ Este plato puede ser alto en sodio. Consúmelo con moderación si tienes hipertensión.`,
+          mensaje: `Este plato puede ser alto en sodio. Consúmelo con moderación si tienes hipertensión.`,
         });
       }
     }
@@ -71,27 +69,27 @@ export default function FichaNutricional({ plato, onCerrar }) {
           ✕
         </button>
 
-        {alerta && (
-          <div
-            style={{
-              backgroundColor:
-                alerta.tipo === "peligro" ? "#fff5f5" : "#fffbeb",
-              border: `1px solid ${alerta.tipo === "peligro" ? "#fed7d7" : "#fbd38d"}`,
-              color: alerta.tipo === "peligro" ? "#e53e3e" : "#c05621",
-              padding: "10px 14px",
-              borderRadius: "8px",
-              fontSize: "0.85rem",
-              fontWeight: "500",
-              marginBottom: "1rem",
-              lineHeight: "1.4",
-            }}
-          >
-            {alerta.mensaje}
-          </div>
-        )}
-
         {/* Contenido scrolleable */}
         <div style={estilos.contenidoScrolleable}>
+          {alerta && (
+            <div
+              style={{
+                backgroundColor:
+                  alerta.tipo === "peligro" ? "#fff5f5" : "#fffbeb",
+                border: `1px solid ${alerta.tipo === "peligro" ? "#fed7d7" : "#fbd38d"}`,
+                color: alerta.tipo === "peligro" ? "#e53e3e" : "#c05621",
+                padding: "10px 14px",
+                borderRadius: "8px",
+                fontSize: "0.85rem",
+                fontWeight: "500",
+                marginBottom: "1rem",
+                lineHeight: "1.4",
+              }}
+            >
+              {alerta.mensaje}
+            </div>
+          )}
+
           <h2 style={estilos.nombre}>{plato.nombre}</h2>
           <p style={estilos.descripcion}>{plato.descripcion}</p>
           <p style={estilos.precio}>S/. {plato.precio}</p>
@@ -134,7 +132,7 @@ export default function FichaNutricional({ plato, onCerrar }) {
 
           {plato.alergenos?.length > 0 && (
             <div style={estilos.seccion}>
-              <h3 style={estilos.tituloSeccion}>⚠️ Contiene alérgenos</h3>
+              <h3 style={estilos.tituloSeccion}>Contiene alérgenos</h3>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                 {plato.alergenos.map((a) => (
                   <span key={a} style={estilos.alergeno}>
@@ -149,72 +147,19 @@ export default function FichaNutricional({ plato, onCerrar }) {
             <h3 style={estilos.tituloSeccion}>Apto para</h3>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
               {plato.apto_vegetariano && (
-                <span style={estilos.apto}>🥗 Vegetariano</span>
+                <span style={estilos.apto}>Vegetariano</span>
               )}
-              {plato.apto_vegano && <span style={estilos.apto}>🌱 Vegano</span>}
+              {plato.apto_vegano && <span style={estilos.apto}>Vegano</span>}
               {plato.apto_sin_gluten && (
-                <span style={estilos.apto}>🌾 Sin gluten</span>
+                <span style={estilos.apto}>Sin gluten</span>
               )}
               {plato.apto_diabetes && (
-                <span style={estilos.apto}>💉 Diabetes</span>
+                <span style={estilos.apto}>Diabetes</span>
               )}
               {plato.apto_hipertension && (
-                <span style={estilos.apto}>❤️ Hipertensión</span>
+                <span style={estilos.apto}>Hipertensión</span>
               )}
             </div>
-          </div>
-        </div>
-
-        {/* Botón fijo en la parte baja */}
-        <div style={estilos.botonesContenedor}>
-          <div
-            style={{
-              marginTop: "1.5rem",
-              paddingTop: "1rem",
-              borderTop: "1px solid #f0f0f0",
-            }}
-          >
-            <label
-              style={{
-                fontSize: "0.82rem",
-                fontWeight: "600",
-                color: "#555",
-                display: "block",
-                marginBottom: "6px",
-              }}
-            >
-              📍 ¿En qué sede estás?
-            </label>
-            <select
-              value={sede}
-              onChange={(e) => setSede(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "8px 12px",
-                borderRadius: "8px",
-                border: "1px solid #e0e0e0",
-                fontSize: "0.9rem",
-                marginBottom: "10px",
-                backgroundColor: "#fff",
-              }}
-            >
-              {SEDES.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-            <button
-              onClick={async () => {
-                await registrarConsumo({ ...plato, sede });
-                alert(
-                  `✅ "${plato.nombre}" registrado en tu historial — ${sede}`,
-                );
-              }}
-              style={estilos.btnPedir}
-            >
-              + Registrar en mi historial
-            </button>
           </div>
         </div>
       </div>
@@ -258,7 +203,8 @@ const estilos = {
     backgroundColor: "#fff",
     borderRadius: "16px",
     maxWidth: "480px",
-    width: "100%",
+    width: "calc(100% - 2rem)",
+    maxHeight: "90vh",
     height: "80vh",
     position: "relative",
     display: "flex",

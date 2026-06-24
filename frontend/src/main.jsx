@@ -3,15 +3,16 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import PaginaLogin from "./autenticacion/PaginaLogin";
 import PaginaRegister from "./autenticacion/PaginaRegister";
-import PaginaPerfil from "./perfil_nutricional/PaginaPerfil";
-import PaginaMenu from "./menu_digital/PaginaMenu";
-import PaginaDashboard from "./dashboard_nutricional/PaginaDashboard";
-import PaginaAdmin from "./analitica_tanta/PaginaAdmin";
-import RutaAdmin from "./compartido/components/RutaAdmin";
-import PaginaMozo from "./mozo/PaginaMozo";
-import PaginaGestionMesa from "./mozo/PaginaGestionMesa";
-import GeneradorQR from "./mozo/GeneradorQR";
-import PaginaMesaQR from "./mesa_qr/PaginaMesaQR";
+import PaginaAuthCallback from "./autenticacion/PaginaAuthCallback";
+import PaginaPerfil from "./perfil_nutricional/paginaPerfil";
+import PaginaMenu from "./menu_digital/paginaMenu";
+import PaginaDashboard from "./dashboard_nutricional/paginaDashboard";
+import PaginaAdmin from "./analitica_tanta/paginaAdmin";
+import RutaAdmin from "./compartido/components/rutaAdmin";
+import PaginaMozo from "./mozo/paginaMozo";
+import PaginaGestionMesa from "./mozo/paginaGestionMesa";
+import GeneradorQR from "./mozo/generadorQR";
+import PaginaMesaQR from "./mesa_qr/paginaMesaQR";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
@@ -20,6 +21,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         {/* Públicas */}
         <Route path="/login" element={<PaginaLogin />} />
         <Route path="/register" element={<PaginaRegister />} />
+        <Route path="/auth/callback" element={<PaginaAuthCallback />} />
 
         {/* Cliente */}
         <Route path="/perfil/completar" element={<PaginaPerfil />} />

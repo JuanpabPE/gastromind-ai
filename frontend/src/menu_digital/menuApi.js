@@ -16,6 +16,7 @@ export async function obtenerMenu(filtros = {}) {
   if (filtros.caloriasMax) query = query.lte("calorias", filtros.caloriasMax);
   if (filtros.proteinasMin && filtros.proteinasMin > 0)
     query = query.gte("proteinas", filtros.proteinasMin);
+  if (filtros.busqueda) query = query.ilike("nombre", `%${filtros.busqueda}%`);
 
   const { data, error } = await query;
   if (error) return [];

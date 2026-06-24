@@ -9,6 +9,13 @@ export default function PaginaLogin() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
   const [mostrarContraseña, setMostrarContraseña] = useState(false);
+  const [avisoVerificacion, setAvisoVerificacion] = useState(() => {
+    const aviso = sessionStorage.getItem("avisoVerificacion") || "";
+    if (aviso) {
+      sessionStorage.removeItem("avisoVerificacion");
+    }
+    return aviso;
+  });
   const puedeEnviar = form.email && form.password;
 
   function handleChange(e) {
@@ -17,20 +24,41 @@ export default function PaginaLogin() {
 
   async function handleSubmit(e) {
     e.preventDefault();
+    setAvisoVerificacion("");
     const resultado = await login(form);
-    if (resultado) navigate("/menu");
+    if (resultado) {
+      const redirect = localStorage.getItem("redirect_after_login");
+      if (redirect) {
+        localStorage.removeItem("redirect_after_login");
+        navigate(redirect);
+      } else {
+        navigate("/menu");
+      }
+    }
   }
 
   return (
     <div style={estilos.pagina}>
       {/* Logo TANTA afuera del formulario, esquina superior izquierda */}
-      <img src={logoTanta} alt="TANTA Logo" style={estilos.logoExterno} />
 
       <div style={estilos.tarjeta}>
+        <div style={{ textAlign: "center", marginBottom: "1rem" }}>
+          <img
+            src={logoTanta}
+            alt="TANTA"
+            style={{ height: "60px", width: "auto" }}
+          />
+        </div>
         <h1 style={estilos.titulo}>Bienvenido de nuevo</h1>
-        <p style={estilos.subtitulo}>a <span style={estilos.spanTanta}>TANTA Restaurante</span></p>
+        <p style={estilos.subtitulo}>
+          a <span style={estilos.spanTanta}>TANTA Restaurante</span>
+        </p>
 
         <form onSubmit={handleSubmit} style={estilos.form}>
+          {avisoVerificacion && (
+            <p style={estilos.avisoVerificacion}>{avisoVerificacion}</p>
+          )}
+
           <div style={estilos.contenedor}>
             <label style={estilos.labelTexto}>Correo electrónico</label>
             <input
@@ -68,8 +96,8 @@ export default function PaginaLogin() {
           </div>
 
           {error && <p style={estilos.error}>{error}</p>}
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             style={{
               ...estilos.boton,
               opacity: puedeEnviar ? 1 : 0.5,
@@ -99,27 +127,17 @@ const estilos = {
     alignItems: "center",
     justifyContent: "center",
     background: "linear-gradient(135deg, #F5F0E8 0%, #EAE1D5 100%)",
-    fontFamily: "'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    fontFamily:
+      "'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
     position: "relative",
     overflow: "hidden",
   },
-  logoExterno: {
-    position: "fixed",
-    top: "2rem",
-    left: "2rem",
-    width: "100px",
-    height: "auto",
-    objectFit: "contain",
-    zIndex: 10,
-  },
   tarjeta: {
-    backgroundColor: "#ffffff",
-    padding: "3rem 2.5rem",
-    borderRadius: "12px",
+    backgroundColor: "#FAFBFC",
+    padding: "3.5rem 2.5rem",
+    borderRadius: "20px",
     width: "100%",
     maxWidth: "420px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-    border: "1px solid #f0f0f0",
     position: "relative",
   },
   titulo: {
@@ -157,9 +175,9 @@ const estilos = {
     marginBottom: "6px",
   },
   input: {
-    padding: "12px 14px",
-    borderRadius: "8px",
-    border: "1px solid #E5E5E5",
+    padding: "13px 14px",
+    borderRadius: "10px",
+    border: "1.5px solid #E0E0E0",
     fontSize: "0.95rem",
     outline: "none",
     fontFamily: "'Montserrat', sans-serif",
@@ -172,9 +190,9 @@ const estilos = {
     alignItems: "center",
   },
   inputContraseña: {
-    padding: "12px 45px 12px 14px",
-    borderRadius: "8px",
-    border: "1px solid #E5E5E5",
+    padding: "13px 45px 13px 14px",
+    borderRadius: "10px",
+    border: "1.5px solid #E0E0E0",
     fontSize: "0.95rem",
     outline: "none",
     fontFamily: "'Montserrat', sans-serif",
@@ -194,27 +212,38 @@ const estilos = {
     padding: "4px",
   },
   boton: {
-    padding: "12px 16px",
-    borderRadius: "8px",
+    padding: "13px 18px",
+    borderRadius: "10px",
     backgroundColor: "#E91E63",
     color: "#fff",
     fontWeight: "700",
-    fontSize: "0.95rem",
+    fontSize: "1rem",
     border: "none",
     cursor: "pointer",
-    marginTop: "20px",
+    marginTop: "24px",
     transition: "all 0.25s ease",
     fontFamily: "'Montserrat', sans-serif",
-    boxShadow: "0 2px 6px rgba(233, 30, 99, 0.2)",
+    boxShadow: "0 4px 12px rgba(233, 30, 99, 0.25)",
   },
-  error: { 
-    color: "#E91E63", 
+  error: {
+    color: "#E91E63",
     fontSize: "0.85rem",
     padding: "8px",
     backgroundColor: "#FFE6F0",
     borderRadius: "4px",
     fontWeight: "500",
     margin: "0",
+  },
+  avisoVerificacion: {
+    color: "#8B2E3B",
+    fontSize: "0.88rem",
+    padding: "10px 12px",
+    backgroundColor: "#FFF3CD",
+    borderRadius: "8px",
+    border: "1px solid #FFE08A",
+    margin: "0",
+    fontWeight: "600",
+    lineHeight: 1.45,
   },
   link: {
     textAlign: "center",
@@ -223,9 +252,9 @@ const estilos = {
     color: "#666",
     fontFamily: "'Montserrat', sans-serif",
   },
-  linkTexto: { 
-    color: "#E91E63", 
-    fontWeight: "700", 
+  linkTexto: {
+    color: "#E91E63",
+    fontWeight: "700",
     textDecoration: "none",
     transition: "opacity 0.2s",
   },

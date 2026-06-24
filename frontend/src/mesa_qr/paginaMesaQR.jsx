@@ -39,9 +39,26 @@ export default function PaginaMesaQR() {
       }
       const mesaData = await res.json();
 
-      if (mesaData.estado !== "ocupada") {
-        setEstado("mesa_libre");
+      if (mesaData.bloqueada) {
+        setEstado("bloqueada");
         return;
+      }
+
+      if (mesaData.estado !== "ocupada") {
+        // El cliente abre la mesa automáticamente
+        const token2 = (await supabase.auth.getSession()).data.session
+          ?.access_token;
+        await fetch(`${API}/pedidos/mesas/${mesaData.id}/abrir`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token2}` },
+        });
+        // Recargar la mesa con el pedido ya abierto
+        const res2 = await fetch(
+          `${API}/pedidos/mesa-por-ubicacion/${encodeURIComponent(sedeDecoded)}/${numero}`,
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        const mesaActualizada = await res2.json();
+        Object.assign(mesaData, mesaActualizada);
       }
 
       // Se une al pedido
@@ -75,6 +92,13 @@ export default function PaginaMesaQR() {
         <div style={estilos.logo}>🍽️</div>
         <h1 style={estilos.titulo}>Tanta</h1>
 
+        {estado === "bloqueada" && (
+          <p style={{ ...estilos.texto, color: "#e53e3e" }}>
+            Esta mesa está temporalmente bloqueada. El mozo la habilitará en
+            breve.
+          </p>
+        )}
+
         {estado === "cargando" && (
           <p style={estilos.texto}>Conectando con tu mesa...</p>
         )}
@@ -82,13 +106,6 @@ export default function PaginaMesaQR() {
         {estado === "error" && (
           <p style={{ ...estilos.texto, color: "#e53e3e" }}>
             No se encontró esta mesa. Verifica el QR.
-          </p>
-        )}
-
-        {estado === "mesa_libre" && (
-          <p style={{ ...estilos.texto, color: "#e53e3e" }}>
-            Esta mesa aún no tiene un pedido abierto. Pídele al mozo que abra la
-            mesa.
           </p>
         )}
 

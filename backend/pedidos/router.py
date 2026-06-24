@@ -48,7 +48,10 @@ async def pedido_activo(mesa_id: str):
 
 @router.get("/mesa-por-ubicacion/{sede}/{numero}")
 async def mesa_por_ubicacion(sede: str, numero: int):
-    mesa = await repositorio.obtener_mesa_por_numero_sede(numero, sede)
+    from urllib.parse import unquote
+    sede_decoded = unquote(sede)
+    print(f"sede recibida: '{sede}' → decoded: '{sede_decoded}'")
+    mesa = await repositorio.obtener_mesa_por_numero_sede(numero, sede_decoded)
     if not mesa:
         raise HTTPException(status_code=404, detail="Mesa no encontrada")
     return mesa
@@ -86,3 +89,16 @@ async def unirse(mesa_id: str, request: Request):
     body = await request.json()
     data = await repositorio.unirse_a_pedido(mesa_id, usuario_id, body.get("nombre", ""))
     return data
+
+@router.post("/mesas/{mesa_id}/liberar")
+async def liberar_mesa(mesa_id: str, request: Request):
+    await get_usuario_id(request)
+    await repositorio.liberar_mesa(mesa_id)
+    return {"ok": True}
+
+@router.post("/mesas/{mesa_id}/bloquear")
+async def bloquear(mesa_id: str, request: Request):
+    await get_usuario_id(request)
+    body = await request.json()
+    await repositorio.bloquear_mesa(mesa_id, body.get("bloquear", True))
+    return {"ok": True}

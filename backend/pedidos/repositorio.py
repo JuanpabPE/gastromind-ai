@@ -1,11 +1,13 @@
 from infraestructura.supabase_cliente import supabase
 
 async def obtener_mesas(sede: str):
+    print(f"Buscando mesas para sede: '{sede}'")
     response = supabase.table("mesas")\
         .select("*, pedidos(id, estado, creado_en)")\
         .eq("sede", sede)\
         .order("numero")\
         .execute()
+    print(f"Resultado: {len(response.data or [])} mesas")
     return response.data or []
 
 async def abrir_pedido(mesa_id: str) -> dict:
@@ -90,6 +92,10 @@ async def finalizar_pedido(pedido_id: str, mesa_id: str):
             .execute()
 
     # Registra en historial cada item con usuario
+    # Obtener sede de la mesa para registrar correctamente
+    mesa_resp = supabase.table("mesas").select("sede").eq("id", mesa_id).single().execute()
+    sede_actual = mesa_resp.data.get("sede") if mesa_resp and mesa_resp.data else "Sin especificar"
+
     for item in items.data or []:
         if item.get("usuario_id") and item.get("plato_id"):
             supabase.table("historial").insert({
@@ -100,7 +106,7 @@ async def finalizar_pedido(pedido_id: str, mesa_id: str):
                 "proteinas": 0,
                 "carbohidratos": 0,
                 "grasas": 0,
-                "sede": "Surco"
+                "sede": sede_actual
             }).execute()
 
     # Cierra el pedido y libera la mesa
@@ -118,14 +124,42 @@ async def finalizar_pedido(pedido_id: str, mesa_id: str):
         .execute()
 
 async def unirse_a_pedido(mesa_id: str, usuario_id: str, nombre: str) -> dict:
+    
     mesa = supabase.table("mesas")\
         .select("pedido_activo_id, estado")\
         .eq("id", mesa_id)\
         .single()\
         .execute()
+    
+    pedido_id = mesa.data.get("pedido_activo_id")
+    if not pedido_id:
+        return mesa.data
+
+    # Obtener clientes actuales
+    pedido = supabase.table("pedidos")\
+        .select("clientes_unidos")\
+        .eq("id", pedido_id)\
+        .single()\
+        .execute()
+    
+    clientes = pedido.data.get("clientes_unidos") or []
+    
+    # Agregar si no está ya
+    if not any(c["id"] == usuario_id for c in clientes):
+        clientes.append({"id": usuario_id, "nombre": nombre})
+        supabase.table("pedidos")\
+            .update({"clientes_unidos": clientes})\
+            .eq("id", pedido_id)\
+            .execute()
+    print(f"unirse: mesa_id={mesa_id}, usuario_id={usuario_id}, nombre={nombre}")
+    print(f"pedido_id={pedido_id}, clientes actuales={clientes}")
+
     return mesa.data
 
+
+
 async def obtener_mesa_por_numero_sede(numero: int, sede: str) -> dict:
+    print(f"Buscando mesa: sede='{sede}', numero={numero}")
     response = supabase.table("mesas")\
         .select("*")\
         .eq("numero", numero)\
@@ -133,3 +167,17 @@ async def obtener_mesa_por_numero_sede(numero: int, sede: str) -> dict:
         .single()\
         .execute()
     return response.data
+
+async def liberar_mesa(mesa_id: str):
+    mesa = supabase.table("mesas").select("pedido_activo_id").eq("id", mesa_id).single().execute()
+    pedido_id = mesa.data.get("pedido_activo_id")
+    if pedido_id:
+        supabase.table("pedidos").update({"estado": "cancelado"}).eq("id", pedido_id).execute()
+        supabase.table("pedido_items").delete().eq("pedido_id", pedido_id).execute()
+    supabase.table("mesas").update({"estado": "libre", "pedido_activo_id": None}).eq("id", mesa_id).execute()
+
+async def bloquear_mesa(mesa_id: str, bloquear: bool):
+    supabase.table("mesas")\
+        .update({"bloqueada": bloquear})\
+        .eq("id", mesa_id)\
+        .execute()

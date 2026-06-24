@@ -38,9 +38,10 @@ export default function PaginaGestionMesa() {
       const itemsData = await obtenerItems(pedidoData.id);
       setItems(itemsData);
 
-      // Clientes únicos en el pedido
       const clientesUnicos = [];
       const idsVistos = new Set();
+
+      // Clientes desde items
       itemsData.forEach((item) => {
         if (item.usuario_id && !idsVistos.has(item.usuario_id)) {
           idsVistos.add(item.usuario_id);
@@ -50,6 +51,15 @@ export default function PaginaGestionMesa() {
           });
         }
       });
+
+      // Clientes que se unieron via QR
+      (pedidoData.clientes_unidos || []).forEach((c) => {
+        if (!idsVistos.has(c.id)) {
+          idsVistos.add(c.id);
+          clientesUnicos.push(c);
+        }
+      });
+
       setClientes(clientesUnicos);
     }
 
@@ -70,6 +80,12 @@ export default function PaginaGestionMesa() {
 
   async function handleAgregarPlato(plato) {
     if (!pedido) return;
+    if (!clienteSeleccionado) {
+      alert(
+        "Selecciona un cliente antes de agregar el plato, o elige 'Sin asignar' para platos compartidos",
+      );
+      return;
+    }
     const puntos =
       plato.apto_diabetes || plato.apto_vegetariano || plato.calorias < 400
         ? 20

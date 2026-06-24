@@ -1,0 +1,16 @@
+export const tema = {
+  rojo: "#8B1A1A",
+  rojoOscuro: "#6B1414",
+  dorado: "#C8A96E",
+  doradoClaro: "#E8D5A3",
+  crema: "#F5F0EB",
+  cremaSuave: "#FAF7F3",
+  negro: "#1A1A1A",
+  grisOscuro: "#444444",
+  grisMedio: "#888888",
+  grisClaro: "#E0E0E0",
+  blanco: "#FFFFFF",
+  verde: "#2D6A4F",
+  fuenteTitulo: '"Playfair Display", Georgia, serif',
+  fuenteCuerpo: '"Lato", "Helvetica Neue", sans-serif',
+};

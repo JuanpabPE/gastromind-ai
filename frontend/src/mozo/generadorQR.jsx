@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
+import { useNavigate } from "react-router-dom";
 
 const SEDES = [
   "Surco - Av. Primavera",
@@ -14,26 +15,26 @@ const BASE_URL = import.meta.env.VITE_APP_URL || "http://localhost:5174";
 
 export default function GeneradorQR() {
   const [sede, setSede] = useState(SEDES[0]);
-
+  const navigate = useNavigate();
   const mesas = Array.from({ length: 20 }, (_, i) => i + 1);
 
   function imprimirQR(numero) {
     const url = `${BASE_URL}/mesa/${encodeURIComponent(sede)}/${numero}`;
+    const imgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(url)}`;
     const ventana = window.open("", "_blank");
     ventana.document.write(`
-      <html>
-        <head><title>QR Mesa ${numero} - ${sede}</title></head>
-        <body style="text-align:center; padding:40px; font-family:sans-serif">
-          <h2>Tanta — ${sede}</h2>
-          <h1 style="font-size:4rem">Mesa ${numero}</h1>
-          <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(url)}" />
-          <p style="margin-top:16px; color:#888; font-size:0.85rem">Escanea para unirte al pedido y ver tu perfil nutricional</p>
-          <p style="color:#ccc; font-size:0.75rem">${url}</p>
-        </body>
-      </html>
-    `);
+    <html>
+      <head><title>QR Mesa ${numero} - ${sede}</title></head>
+      <body style="text-align:center; padding:40px; font-family:sans-serif">
+        <h2>Tanta — ${sede}</h2>
+        <h1 style="font-size:4rem">Mesa ${numero}</h1>
+        <img src="${imgUrl}" onload="window.print()" />
+        <p style="margin-top:16px; color:#888; font-size:0.85rem">Escanea para unirte al pedido</p>
+        <p style="color:#ccc; font-size:0.75rem">${url}</p>
+      </body>
+    </html>
+  `);
     ventana.document.close();
-    ventana.print();
   }
 
   return (
@@ -54,6 +55,19 @@ export default function GeneradorQR() {
           ))}
         </select>
       </div>
+      <button
+        onClick={() => navigate("/mozo")}
+        style={{
+          marginBottom: "1rem",
+          padding: "8px 16px",
+          borderRadius: "8px",
+          border: "1px solid #e0e0e0",
+          backgroundColor: "#fff",
+          cursor: "pointer",
+        }}
+      >
+        ← Volver
+      </button>
 
       <div style={estilos.grid}>
         {mesas.map((numero) => {

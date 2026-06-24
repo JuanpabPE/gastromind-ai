@@ -1,0 +1,38 @@
+[33mcommit 24066008b4f2f6f61c78c274507d86c1b7cae8a2[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeature/validacion-contraseña-fuerte-y-perfil[m[33m, [m[1;31morigin/feature/validacion-contraseña-fuerte-y-perfil[m[33m)[m
+Author: pablo <pablo.navane23@gmail.com>
+Date:   Wed May 13 00:39:24 2026 -0500
+
+    feat: Agregar validación fuerte de contraseña y pre-rellenar nombre en perfil
+    
+    - PaginaRegister.jsx:
+      * Validación de contraseña con 5 criterios (6+ chars, mayúscula, minúscula, número, especial)
+      * Barra visual de fortaleza (rojo/verde claro/verde oscuro)
+      * Mostrar lista de criterios a cumplir
+      * Desabilitar botón si contraseña es débil
+      * Guardar nombre en sessionStorage para /completar
+    
+    - paginaPerfil.jsx:
+      * Leer nombre desde sessionStorage al cargar
+      * Pre-rellenar campo nombre (no editable, readonly)
+      * Indicador visual: 'Registrado como: [nombre]'
+      * Validar que Alergias, Enfermedades y Preferencias estén completas
+      * Desabilitar submit si falta información obligatoria
+      * Mostrar mensaje claro de validación
+
+[33mcommit 217075fa9784276f879b28cc4bb57de3f9ab6cbf[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/develop[m[33m, [m[1;32mmain[m[33m, [m[1;32mdevelop[m[33m)[m
+Author: pablo <pablo.navane23@gmail.com>
+Date:   Wed May 13 00:24:37 2026 -0500
+
+    se añadio funcionalidades del mozo y mesa qr
+
+[33mcommit e33bbe41c365827281e0567bdd30755c2e7ad977[m
+Author: Juanpa <pablo.navane23@gmail.com>
+Date:   Fri Apr 24 15:08:00 2026 -0500
+
+    feat: agrega alertas y selección de sede en ficha nutricional
+
+[33mcommit a1e683eaea7aa08c5783d2c4d45ecce49eb16ea6[m
+Author: Juanpa <pablo.navane23@gmail.com>
+Date:   Thu Apr 23 22:21:55 2026 -0500
+
+    feat: GastroMind AI - sistema completo inicial

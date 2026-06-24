@@ -28,7 +28,7 @@ function generarContraseñaAleatoria() {
   const minusculas = "abcdefghijklmnopqrstuvwxyz";
   const numeros = "0123456789";
   const especiales = "!@#$%^&*()_+-=[]{}';:\"\\|,.<>/?";
-  
+
   // Garantizar al menos uno de cada tipo
   let contraseña = [
     mayusculas[Math.floor(Math.random() * mayusculas.length)],
@@ -36,13 +36,13 @@ function generarContraseñaAleatoria() {
     numeros[Math.floor(Math.random() * numeros.length)],
     especiales[Math.floor(Math.random() * especiales.length)],
   ];
-  
+
   // Completar hasta 12 caracteres con mezcla aleatoria
   const todos = mayusculas + minusculas + numeros + especiales;
   for (let i = contraseña.length; i < 12; i++) {
     contraseña.push(todos[Math.floor(Math.random() * todos.length)]);
   }
-  
+
   // Mezclar para que no sea predecible
   contraseña = contraseña.sort(() => Math.random() - 0.5);
   return contraseña.join("");
@@ -83,9 +83,13 @@ export default function PaginaRegister() {
   const [contraseñaSugerida, setContraseñaSugerida] = useState("");
 
   const fortaleza = evaluarFortalezaContraseña(form.password);
-  const contraseñasCoinciden = form.password === form.confirmPassword && form.password !== "";
+  const contraseñasCoinciden =
+    form.password === form.confirmPassword && form.password !== "";
   const puedeEnviar =
-    form.nombre && form.email && fortaleza.nivel !== "no segura" && contraseñasCoinciden;
+    form.nombre &&
+    form.email &&
+    fortaleza.nivel !== "no segura" &&
+    contraseñasCoinciden;
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -128,11 +132,19 @@ export default function PaginaRegister() {
   return (
     <div style={estilos.pagina}>
       {/* Logo TANTA afuera del formulario, esquina superior izquierda */}
-      <img src={logoTanta} alt="TANTA Logo" style={estilos.logoExterno} />
 
       <div style={estilos.tarjeta}>
+        <div style={{ textAlign: "center", marginBottom: "1rem" }}>
+          <img
+            src={logoTanta}
+            alt="TANTA"
+            style={{ height: "60px", width: "auto" }}
+          />
+        </div>
         <h1 style={estilos.titulo}>Crea tu cuenta</h1>
-        <p style={estilos.subtitulo}>en <span style={estilos.spanTanta}>TANTA Restaurante</span></p>
+        <p style={estilos.subtitulo}>
+          en <span style={estilos.spanTanta}>TANTA Restaurante</span>
+        </p>
 
         <form onSubmit={handleSubmit} style={estilos.form}>
           <div style={estilos.contenedor}>
@@ -272,7 +284,9 @@ export default function PaginaRegister() {
               />
               <button
                 type="button"
-                onClick={() => setMostrarConfirmPassword(!mostrarConfirmPassword)}
+                onClick={() =>
+                  setMostrarConfirmPassword(!mostrarConfirmPassword)
+                }
                 style={estilos.botonOjo}
                 title={mostrarConfirmPassword ? "Ocultar" : "Mostrar"}
               >
@@ -281,7 +295,9 @@ export default function PaginaRegister() {
             </div>
 
             {form.confirmPassword && !contraseñasCoinciden && (
-              <p style={estilos.errorValidacion}>Las contraseñas no coinciden</p>
+              <p style={estilos.errorValidacion}>
+                Las contraseñas no coinciden
+              </p>
             )}
             {contraseñasCoinciden && (
               <p style={estilos.exitoValidacion}>Contraseñas coinciden</p>
@@ -320,19 +336,12 @@ const estilos = {
     alignItems: "center",
     justifyContent: "center",
     background: "linear-gradient(135deg, #F5F0E8 0%, #EAE1D5 100%)",
-    fontFamily: "'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    fontFamily:
+      "'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
     position: "relative",
     overflow: "hidden",
   },
-  logoExterno: {
-    position: "fixed",
-    top: "2rem",
-    left: "2rem",
-    width: "100px",
-    height: "auto",
-    objectFit: "contain",
-    zIndex: 10,
-  },
+
   tarjeta: {
     backgroundColor: "#FAFBFC",
     padding: "3.5rem 2.5rem",
@@ -545,9 +554,9 @@ const estilos = {
     color: "#666",
     fontFamily: "'Montserrat', sans-serif",
   },
-  linkTexto: { 
-    color: "#E91E63", 
-    fontWeight: "700", 
+  linkTexto: {
+    color: "#E91E63",
+    fontWeight: "700",
     textDecoration: "none",
     transition: "opacity 0.2s",
   },

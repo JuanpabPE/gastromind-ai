@@ -8,6 +8,7 @@ export function useMenu() {
   const [cargando, setCargando] = useState(true);
   const [filtros, setFiltros] = useState({
     categoria: "",
+    busqueda: "",
     vegetariano: false,
     vegano: false,
     sinGluten: false,
