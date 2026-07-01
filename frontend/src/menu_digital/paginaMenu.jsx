@@ -11,7 +11,14 @@ import { tema } from "../compartido/estilos/tema";
 import logoTanta from "../assets/images/logo_tanta.png";
 
 export default function PaginaMenu() {
-  const { platos, cargando, filtros, setFiltros, tieneAlergeno, alertasPorPlato } = useMenu();
+  const {
+    platos,
+    cargando,
+    filtros,
+    setFiltros,
+    tieneAlergeno,
+    alertasPorPlato,
+  } = useMenu();
   const [platoSeleccionado, setPlatoSeleccionado] = useState(null);
   const [esAdmin, setEsAdmin] = useState(false);
   const [esMozo, setEsMozo] = useState(false);
@@ -132,12 +139,14 @@ export default function PaginaMenu() {
             >
               Mi Dashboard
             </button>
-            <button
-              onClick={() => navigate("/evaluacion-ia")}
-              style={estilos.btnHeader}
-            >
-              Evaluacion IA
-            </button>
+            {esAdmin && (
+              <button
+                onClick={() => navigate("/evaluacion-ia")}
+                style={estilos.btnHeader}
+              >
+                Evaluacion IA
+              </button>
+            )}
             {esMozo && (
               <button
                 onClick={() => navigate("/mozo")}
@@ -328,7 +337,10 @@ export default function PaginaMenu() {
         </div>
       </div>
 
-      <div className="menu-contenedor" style={{ maxWidth: "1200px", margin: "0 auto", padding: "1.5rem" }}>
+      <div
+        className="menu-contenedor"
+        style={{ maxWidth: "1200px", margin: "0 auto", padding: "1.5rem" }}
+      >
         {/* Recomendaciones */}
         <PanelRecomendaciones onVerFicha={setPlatoSeleccionado} />
 
@@ -402,13 +414,13 @@ export default function PaginaMenu() {
             ) : filtros.categoria ? (
               <div className="menu-grid-platos" style={estilos.grid}>
                 {platos.map((plato) => (
-                    <TarjetaPlato
-                      key={plato.id}
-                      plato={plato}
-                      tieneAlergeno={tieneAlergeno}
-                      alerta={alertasPorPlato[plato.id]}
-                      onClick={() => setPlatoSeleccionado(plato)}
-                    />
+                  <TarjetaPlato
+                    key={plato.id}
+                    plato={plato}
+                    tieneAlergeno={tieneAlergeno}
+                    alerta={alertasPorPlato[plato.id]}
+                    onClick={() => setPlatoSeleccionado(plato)}
+                  />
                 ))}
               </div>
             ) : (
