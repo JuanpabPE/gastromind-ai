@@ -8,6 +8,7 @@ import PaginaPerfil from "./perfil_nutricional/paginaPerfil";
 import PaginaMenu from "./menu_digital/paginaMenu";
 import PaginaDashboard from "./dashboard_nutricional/paginaDashboard";
 import PaginaAdmin from "./analitica_tanta/paginaAdmin";
+import PaginaEvaluacionIa from "./evaluacion_ia/paginaEvaluacionIa";
 import RutaAdmin from "./compartido/components/rutaAdmin";
 import PaginaMozo from "./mozo/paginaMozo";
 import PaginaGestionMesa from "./mozo/paginaGestionMesa";
@@ -27,6 +28,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <Route path="/perfil/completar" element={<PaginaPerfil />} />
         <Route path="/menu" element={<PaginaMenu />} />
         <Route path="/dashboard" element={<PaginaDashboard />} />
+        <Route path="/evaluacion-ia" element={<PaginaEvaluacionIa />} />
 
         {/* QR de mesa — acceso desde celular del cliente */}
         <Route path="/mesa/:sede/:numero" element={<PaginaMesaQR />} />

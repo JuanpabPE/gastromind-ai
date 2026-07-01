@@ -58,7 +58,7 @@ export default function PaginaMozo() {
     const data = await obtenerMesas(sedeActual);
     setMesas(data);
     setCargando(false);
-  }
+  }, [sedeActual]);
 
   async function cargarPremios() {
     const {

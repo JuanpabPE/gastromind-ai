@@ -1,32 +1,23 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../compartido/api/cliente";
 
-const SEDES = [
-  "Surco - Av. Primavera",
-  "San Isidro - El Olivar",
-  "Miraflores - Larco",
-  "La Molina",
-  "San Borja",
-  "Aeropuerto",
-];
+const API = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 export default function FichaNutricional({ plato, onCerrar }) {
   const [alerta, setAlerta] = useState(null);
+  const [analizando, setAnalizando] = useState(false);
 
   useEffect(() => {
-    async function verificar() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return;
+    let activo = true;
 
+    async function verificarConReglasLocales(user) {
       const { data: perfil } = await supabase
         .from("perfiles")
         .select("alergias, enfermedades")
         .eq("usuario_id", user.id)
         .single();
 
-      if (!perfil) return;
+      if (!perfil || !activo) return;
 
       const alergenos = plato.alergenos || [];
       const alergias = (perfil.alergias || []).map((a) => a.toLowerCase());
@@ -37,7 +28,12 @@ export default function FichaNutricional({ plato, onCerrar }) {
       if (encontrados.length > 0) {
         setAlerta({
           tipo: "peligro",
-          mensaje: `Este plato contiene ${encontrados.join(", ")} — ingredientes que debes evitar según tu perfil.`,
+          mensaje: `Este plato contiene ${encontrados.join(", ")}; ingredientes que debes evitar segun tu perfil.`,
+          advertencias: [{
+            tipo: "alergeno",
+            nivel: "peligro",
+            mensaje: `Este plato contiene ${encontrados.join(", ")}; ingredientes que debes evitar segun tu perfil.`,
+          }],
         });
         return;
       }
@@ -48,45 +44,130 @@ export default function FichaNutricional({ plato, onCerrar }) {
       ) {
         setAlerta({
           tipo: "precaucion",
-          mensaje: `Este plato tiene ${plato.carbohidratos}g de carbohidratos. Consúmelo con moderación si tienes diabetes.`,
+          mensaje: `Este plato tiene ${plato.carbohidratos}g de carbohidratos. Consumelo con moderacion si tienes diabetes.`,
+          advertencias: [{
+            tipo: "diabetes",
+            nivel: "precaucion",
+            mensaje: `Este plato tiene ${plato.carbohidratos}g de carbohidratos. Consumelo con moderacion si tienes diabetes.`,
+          }],
         });
         return;
       }
 
-      if (perfil.enfermedades?.includes("Hipertensión") && plato.grasas > 25) {
+      if (perfil.enfermedades?.includes("Hipertension") && plato.grasas > 25) {
         setAlerta({
           tipo: "precaucion",
-          mensaje: `Este plato puede ser alto en sodio. Consúmelo con moderación si tienes hipertensión.`,
+          mensaje:
+            "Este plato puede ser alto en sodio. Consumelo con moderacion si tienes hipertension.",
+          advertencias: [{
+            tipo: "hipertension",
+            nivel: "precaucion",
+            mensaje:
+              "Este plato puede ser alto en sodio. Consumelo con moderacion si tienes hipertension.",
+          }],
         });
       }
     }
+
+    async function verificar() {
+      setAlerta(null);
+      setAnalizando(true);
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        if (activo) setAnalizando(false);
+        return;
+      }
+
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        if (session?.access_token) {
+          const response = await fetch(`${API}/alertas/${plato.id}`, {
+            headers: { Authorization: `Bearer ${session.access_token}` },
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            const advertencias = data?.advertencias || [];
+            const hayPeligro = advertencias.some((a) => a.nivel === "peligro");
+
+            if (activo && advertencias.length > 0) {
+              setAlerta({
+                tipo: hayPeligro ? "peligro" : "precaucion",
+                mensaje: advertencias
+                  .map((a) => a.mensaje)
+                  .filter(Boolean)
+                  .join(" "),
+                advertencias,
+              });
+            }
+            return;
+          }
+        }
+
+        await verificarConReglasLocales(user);
+      } catch (error) {
+        console.warn("No se pudo consultar la alerta con IA:", error);
+        await verificarConReglasLocales(user);
+      } finally {
+        if (activo) setAnalizando(false);
+      }
+    }
+
     verificar();
+
+    return () => {
+      activo = false;
+    };
   }, [plato]);
+
   return (
     <div style={estilos.overlay} onClick={onCerrar}>
-      <div style={estilos.modal} onClick={(e) => e.stopPropagation()}>
+      <div
+        className="ficha-modal"
+        style={estilos.modal}
+        onClick={(e) => e.stopPropagation()}
+      >
         <button onClick={onCerrar} style={estilos.cerrar}>
-          ✕
+          x
         </button>
 
-        {/* Contenido scrolleable */}
-        <div style={estilos.contenidoScrolleable}>
+        <div className="ficha-contenido" style={estilos.contenidoScrolleable}>
+          {analizando && !alerta && (
+            <div style={estilos.analizando}>
+              Analizando compatibilidad nutricional...
+            </div>
+          )}
+
           {alerta && (
             <div
               style={{
-                backgroundColor:
-                  alerta.tipo === "peligro" ? "#fff5f5" : "#fffbeb",
-                border: `1px solid ${alerta.tipo === "peligro" ? "#fed7d7" : "#fbd38d"}`,
-                color: alerta.tipo === "peligro" ? "#e53e3e" : "#c05621",
-                padding: "10px 14px",
-                borderRadius: "8px",
-                fontSize: "0.85rem",
-                fontWeight: "500",
-                marginBottom: "1rem",
-                lineHeight: "1.4",
+                ...estilos.alerta,
+                ...(alerta.tipo === "peligro"
+                  ? estilos.alertaPeligro
+                  : estilos.alertaPrecaucion),
               }}
             >
-              {alerta.mensaje}
+              {(alerta.advertencias || [{ tipo: "alerta", mensaje: alerta.mensaje }]).map(
+                (advertencia, index) => (
+                  <div
+                    className="ficha-alerta-item"
+                    key={`${advertencia.tipo}-${index}`}
+                    style={estilos.alertaItem}
+                  >
+                    <strong style={estilos.alertaFuente}>
+                      {nombreFuente(advertencia.tipo)}
+                    </strong>
+                    <span>{advertencia.mensaje}</span>
+                  </div>
+                ),
+              )}
             </div>
           )}
 
@@ -95,16 +176,16 @@ export default function FichaNutricional({ plato, onCerrar }) {
           <p style={estilos.precio}>S/. {plato.precio}</p>
 
           <div style={estilos.seccion}>
-            <h3 style={estilos.tituloSeccion}>Información nutricional</h3>
-            <div style={estilos.gridNutri}>
+            <h3 style={estilos.tituloSeccion}>Informacion nutricional</h3>
+            <div className="ficha-grid-nutri" style={estilos.gridNutri}>
               <Nutriente
-                label="Calorías"
+                label="Calorias"
                 valor={plato.calorias}
                 unidad="kcal"
                 color="#c8a96e"
               />
               <Nutriente
-                label="Proteínas"
+                label="Proteinas"
                 valor={plato.proteinas}
                 unidad="g"
                 color="#48bb78"
@@ -132,8 +213,8 @@ export default function FichaNutricional({ plato, onCerrar }) {
 
           {plato.alergenos?.length > 0 && (
             <div style={estilos.seccion}>
-              <h3 style={estilos.tituloSeccion}>Contiene alérgenos</h3>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+              <h3 style={estilos.tituloSeccion}>Contiene alergenos</h3>
+              <div style={estilos.listaChips}>
                 {plato.alergenos.map((a) => (
                   <span key={a} style={estilos.alergeno}>
                     {a}
@@ -145,7 +226,7 @@ export default function FichaNutricional({ plato, onCerrar }) {
 
           <div style={estilos.seccion}>
             <h3 style={estilos.tituloSeccion}>Apto para</h3>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+            <div style={estilos.listaChips}>
               {plato.apto_vegetariano && (
                 <span style={estilos.apto}>Vegetariano</span>
               )}
@@ -157,7 +238,7 @@ export default function FichaNutricional({ plato, onCerrar }) {
                 <span style={estilos.apto}>Diabetes</span>
               )}
               {plato.apto_hipertension && (
-                <span style={estilos.apto}>Hipertensión</span>
+                <span style={estilos.apto}>Hipertension</span>
               )}
             </div>
           </div>
@@ -169,14 +250,7 @@ export default function FichaNutricional({ plato, onCerrar }) {
 
 function Nutriente({ label, valor, unidad, color }) {
   return (
-    <div
-      style={{
-        textAlign: "center",
-        padding: "12px",
-        backgroundColor: "#f9f9f9",
-        borderRadius: "8px",
-      }}
-    >
+    <div style={estilos.nutriente}>
       <p style={{ fontSize: "1.4rem", fontWeight: "700", color, margin: 0 }}>
         {valor}
         <span style={{ fontSize: "0.75rem", color: "#999" }}>{unidad}</span>
@@ -186,6 +260,17 @@ function Nutriente({ label, valor, unidad, color }) {
       </p>
     </div>
   );
+}
+
+function nombreFuente(tipo) {
+  const fuentes = {
+    alergeno: "Menu",
+    fooddata: "FoodData",
+    compatibilidad_ia: "IA",
+    diabetes: "Reglas",
+    hipertension: "Reglas",
+  };
+  return fuentes[tipo] || "Alerta";
 }
 
 const estilos = {
@@ -218,12 +303,6 @@ const estilos = {
     paddingTop: "3rem",
     boxSizing: "border-box",
   },
-  botonesContenedor: {
-    padding: "1rem 2rem",
-    borderTop: "1px solid #f0f0f0",
-    boxSizing: "border-box",
-    flexShrink: 0,
-  },
   cerrar: {
     position: "absolute",
     top: "1rem",
@@ -233,6 +312,46 @@ const estilos = {
     fontSize: "1.2rem",
     cursor: "pointer",
     color: "#888",
+  },
+  analizando: {
+    backgroundColor: "#f8fafc",
+    border: "1px solid #e2e8f0",
+    color: "#64748b",
+    padding: "10px 14px",
+    borderRadius: "8px",
+    fontSize: "0.85rem",
+    fontWeight: "500",
+    marginBottom: "1rem",
+    lineHeight: "1.4",
+  },
+  alerta: {
+    padding: "10px 14px",
+    borderRadius: "8px",
+    fontSize: "0.85rem",
+    fontWeight: "500",
+    marginBottom: "1rem",
+    lineHeight: "1.4",
+  },
+  alertaItem: {
+    display: "grid",
+    gridTemplateColumns: "84px 1fr",
+    gap: "8px",
+    alignItems: "start",
+    marginBottom: "6px",
+  },
+  alertaFuente: {
+    fontSize: "0.72rem",
+    textTransform: "uppercase",
+  },
+  alertaPeligro: {
+    backgroundColor: "#fff5f5",
+    border: "1px solid #fed7d7",
+    color: "#e53e3e",
+  },
+  alertaPrecaucion: {
+    backgroundColor: "#fffbeb",
+    border: "1px solid #fbd38d",
+    color: "#c05621",
   },
   nombre: {
     fontSize: "1.4rem",
@@ -268,6 +387,17 @@ const estilos = {
     gridTemplateColumns: "repeat(3, 1fr)",
     gap: "8px",
   },
+  nutriente: {
+    textAlign: "center",
+    padding: "12px",
+    backgroundColor: "#f9f9f9",
+    borderRadius: "8px",
+  },
+  listaChips: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "8px",
+  },
   alergeno: {
     padding: "4px 12px",
     borderRadius: "20px",
@@ -285,17 +415,5 @@ const estilos = {
     fontSize: "0.8rem",
     fontWeight: "500",
     border: "1px solid #c6f6d5",
-  },
-  btnPedir: {
-    width: "100%",
-    padding: "12px",
-    borderRadius: "8px",
-    backgroundColor: "#c8a96e",
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: "0.95rem",
-    border: "none",
-    cursor: "pointer",
-    marginTop: "1rem",
   },
 };

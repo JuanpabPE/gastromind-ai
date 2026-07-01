@@ -1,5 +1,11 @@
-export default function TarjetaPlato({ plato, tieneAlergeno, onClick }) {
+export default function TarjetaPlato({ plato, tieneAlergeno, alerta, onClick }) {
   const conAlergeno = tieneAlergeno(plato);
+  const advertenciaPrincipal = alerta?.advertencias?.find(
+    (a) => a.nivel === "peligro",
+  );
+  const precaucionPrincipal = alerta?.advertencias?.find(
+    (a) => a.nivel === "precaucion",
+  );
 
   return (
     <div
@@ -10,10 +16,18 @@ export default function TarjetaPlato({ plato, tieneAlergeno, onClick }) {
         cursor: "pointer",
       }}
     >
-      {conAlergeno && (
+      {advertenciaPrincipal ? (
         <div style={estilos.alertaAlergeno}>
-          Contiene alérgenos de tu perfil
+          {advertenciaPrincipal.tipo === "fooddata"
+            ? "FoodData detecta un riesgo para tu perfil"
+            : "Alerta: contiene alergenos de tu perfil"}
         </div>
+      ) : precaucionPrincipal ? (
+        <div style={estilos.alertaPrecaucion}>
+          Precaucion nutricional para tu perfil
+        </div>
+      ) : (
+        <div style={estilos.seguroPerfil}>Seguro para tu perfil</div>
       )}
 
       <div style={estilos.header}>
@@ -39,7 +53,7 @@ export default function TarjetaPlato({ plato, tieneAlergeno, onClick }) {
         {plato.apto_diabetes && <span style={estilos.badge}>Diabetes</span>}
       </div>
 
-      <p style={estilos.verMas}>Ver ficha nutricional →</p>
+      <p style={estilos.verMas}>Ver ficha nutricional</p>
     </div>
   );
 }
@@ -55,6 +69,24 @@ const estilos = {
   alertaAlergeno: {
     backgroundColor: "#fff5f5",
     color: "#e53e3e",
+    fontSize: "0.78rem",
+    fontWeight: "600",
+    padding: "6px 10px",
+    borderRadius: "6px",
+    marginBottom: "10px",
+  },
+  alertaPrecaucion: {
+    backgroundColor: "#fffbeb",
+    color: "#c05621",
+    fontSize: "0.78rem",
+    fontWeight: "600",
+    padding: "6px 10px",
+    borderRadius: "6px",
+    marginBottom: "10px",
+  },
+  seguroPerfil: {
+    backgroundColor: "#f0fff4",
+    color: "#2f855a",
     fontSize: "0.78rem",
     fontWeight: "600",
     padding: "6px 10px",

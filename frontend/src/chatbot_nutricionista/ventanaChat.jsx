@@ -31,9 +31,9 @@ export default function VentanaChat({ onCerrar, chatProps }) {
   }
 
   return (
-    <div style={estilos.overlay}>
-      <div style={estilos.ventana}>
-        <div style={estilos.header}>
+    <div className="chat-overlay" style={estilos.overlay}>
+      <div className="chat-ventana" style={estilos.ventana}>
+        <div className="chat-header" style={estilos.header}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <div style={estilos.logoHeader}>T</div>
             <div>
@@ -41,7 +41,7 @@ export default function VentanaChat({ onCerrar, chatProps }) {
               <p style={estilos.headerSub}>Tu sommelier nutricional</p>
             </div>
           </div>
-          <div style={{ display: "flex", gap: "8px" }}>
+          <div className="chat-header-acciones" style={{ display: "flex", gap: "8px" }}>
             <button
               onClick={limpiarChat}
               style={estilos.btnHeader}
@@ -89,7 +89,7 @@ export default function VentanaChat({ onCerrar, chatProps }) {
           </div>
         )}
 
-        <div style={estilos.inputArea}>
+        <div className="chat-input-area" style={estilos.inputArea}>
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}

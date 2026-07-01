@@ -65,12 +65,12 @@ export default function PaginaDashboard() {
         </div>
       </div>
 
-      <div style={estilos.contenedor}>
+      <div className="dashboard-contenedor" style={estilos.contenedor}>
         {/* Fidelizacion */}
         <TarjetaPuntos />
 
         {/* Tarjetas resumen */}
-        <div style={estilos.gridResumen}>
+        <div className="dashboard-grid-resumen" style={estilos.gridResumen}>
           <TarjetaResumen
             valor={resumen?.total_visitas || 0}
             label="Platos registrados"
@@ -111,7 +111,7 @@ export default function PaginaDashboard() {
           ) : (
             <div style={estilos.listaHistorial}>
               {historial.map((item, i) => (
-                <div key={i} style={estilos.itemHistorial}>
+                <div className="dashboard-item-historial" key={i} style={estilos.itemHistorial}>
                   <div style={estilos.itemInfo}>
                     <p style={estilos.itemNombre}>{item.plato_nombre}</p>
                     <p style={estilos.itemFecha}>

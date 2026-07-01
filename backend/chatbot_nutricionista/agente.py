@@ -54,11 +54,19 @@ REGLAS IMPORTANTES:
 
     mensajes = historial + [{"role": "user", "content": mensaje}]
 
-    response = groq_client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=[{"role": "system", "content": sistema}] + mensajes,
-        max_tokens=300,
-        temperature=0.7,
-    )
+    try:
+        response = groq_client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "system", "content": sistema}] + mensajes,
+            max_tokens=300,
+            temperature=0.7,
+        )
 
-    return response.choices[0].message.content
+        return response.choices[0].message.content
+    except Exception as e:
+        print(f"Error llamando al modelo de IA del chatbot: {e}")
+        return (
+            "Ahora mismo no puedo conectarme al modelo de IA externo. "
+            "La app si esta funcionando, pero falta validar la API key/modelo de xAI o usar una key de Groq. "
+            "Mientras tanto revisa la ficha nutricional del plato y evita cualquier alergeno registrado en tu perfil."
+        )

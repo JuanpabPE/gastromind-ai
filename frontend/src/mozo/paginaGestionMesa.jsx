@@ -130,9 +130,9 @@ export default function PaginaGestionMesa() {
     );
 
   return (
-    <div style={estilos.pagina}>
+    <div className="mozo-gestion-pagina" style={estilos.pagina}>
       {/* Header */}
-      <div style={estilos.header}>
+      <div className="mozo-gestion-header" style={estilos.header}>
         <div>
           <h1 style={estilos.titulo}>Mesa {mesaInfo?.numero}</h1>
           <p style={estilos.subtitulo}>{mesaInfo?.sede}</p>
@@ -152,7 +152,7 @@ export default function PaginaGestionMesa() {
         </div>
       </div>
 
-      <div style={estilos.layout}>
+      <div className="mozo-gestion-layout" style={estilos.layout}>
         {/* Panel izquierdo — menú */}
         <div style={estilos.panelMenu}>
           <h2 style={estilos.tituloPanel}>Agregar platos</h2>
@@ -229,7 +229,7 @@ export default function PaginaGestionMesa() {
         </div>
 
         {/* Panel derecho — pedido actual */}
-        <div style={estilos.panelPedido}>
+        <div className="mozo-gestion-pedido" style={estilos.panelPedido}>
           <h2 style={estilos.tituloPanel}>Pedido actual</h2>
 
           {items.length === 0 ? (

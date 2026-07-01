@@ -15,14 +15,16 @@ export default function PanelRecomendaciones({ onVerFicha }) {
 
   if (error || recomendaciones.length === 0) return null;
 
+  const recomendacionesVisibles = recomendaciones.slice(0, 3);
+
   return (
     <div style={estilos.contenedor}>
-      <h2 style={estilos.titulo}>Para ti</h2>
+      <h2 style={estilos.titulo}>Recomendado para ti</h2>
       <p style={estilos.subtitulo}>
-        Basado en tu perfil de salud, preferencias e historial
+        Platos seguros segun tu perfil, preferencias e historial
       </p>
       <div style={estilos.lista}>
-        {recomendaciones.map((plato, i) => (
+        {recomendacionesVisibles.map((plato, i) => (
           <TarjetaRecomendacion
             key={`${plato.id}-${i}`}
             plato={plato}

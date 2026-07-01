@@ -1,6 +1,11 @@
 from infraestructura.supabase_cliente import supabase
 from infraestructura.groq_cliente import groq_client
+from alertas_alergenos.detector import detectar_riesgos_reglas_fooddata
 import json
+
+def normalizar_texto(valor: str) -> str:
+    reemplazos = str.maketrans("áéíóúÁÉÍÓÚñÑ", "aeiouAEIOUnN")
+    return str(valor or "").translate(reemplazos).lower().strip()
 
 def construir_descripcion_perfil(perfil: dict) -> str:
     partes = []
@@ -33,11 +38,10 @@ def construir_descripcion_plato(plato: dict) -> str:
 
 def recomendar_con_ia(platos: list, perfil: dict, historial_ids: list = [], top: int = 5) -> list:
     # Filtra primero los platos con alérgenos peligrosos — esto es innegociable
-    alergias = [a.lower() for a in perfil.get("alergias", []) if a != "Ninguna"]
     platos_seguros = []
     for plato in platos:
-        alergenos_plato = [a.lower() for a in (plato.get("alergenos") or [])]
-        if any(a in alergenos_plato for a in alergias):
+        evaluacion = detectar_riesgos_reglas_fooddata(plato, perfil)
+        if not evaluacion["es_seguro"]:
             continue
         platos_seguros.append(plato)
 
@@ -128,31 +132,45 @@ Responde ÚNICAMENTE con un JSON válido con este formato exacto, sin texto adic
         return fallback_reglas(platos_seguros, perfil, historial_ids, top)
 
 def fallback_reglas(platos: list, perfil: dict, historial_ids: list, top: int) -> list:
-    enfermedades = perfil.get("enfermedades", [])
-    preferencias = perfil.get("preferencias", [])
+    enfermedades = [normalizar_texto(e) for e in perfil.get("enfermedades", [])]
+    preferencias = [normalizar_texto(p) for p in perfil.get("preferencias", [])]
+    objetivo_calorico = perfil.get("objetivo_calorico")
 
     scored = []
     for plato in platos:
+        evaluacion = detectar_riesgos_reglas_fooddata(plato, perfil)
+        if not evaluacion["es_seguro"]:
+            continue
         score = 100.0
+        motivos = ["no tiene riesgos peligrosos en reglas ni FoodData"]
         if plato.get("id") in historial_ids:
             score -= 40
-        if "Vegano" in preferencias and plato.get("apto_vegano"):
+            motivos.append("lo bajamos porque ya lo consumiste recientemente")
+        if "vegano" in preferencias and plato.get("apto_vegano"):
             score += 30
-        if "Vegetariano" in preferencias and plato.get("apto_vegetariano"):
+            motivos.append("coincide con tu preferencia vegana")
+        if "vegetariano" in preferencias and plato.get("apto_vegetariano"):
             score += 20
-        if "Diabetes" in enfermedades and plato.get("apto_diabetes"):
+            motivos.append("coincide con tu preferencia vegetariana")
+        if "diabetes" in enfermedades and plato.get("apto_diabetes"):
             score += 25
-        if "Hipertensión" in enfermedades and plato.get("apto_hipertension"):
+            motivos.append("es apto para diabetes")
+        if "hipertension" in enfermedades and plato.get("apto_hipertension"):
             score += 25
+            motivos.append("es apto para hipertension")
+        if objetivo_calorico and plato.get("calorias"):
+            if plato["calorias"] <= objetivo_calorico * 0.35:
+                score += 10
+                motivos.append("encaja con tu objetivo calorico diario")
         scored.append({
             **plato,
             "score_recomendacion": score,
-            "explicacion": f"Contiene {plato.get('calorias')} kcal y {plato.get('proteinas')}g de proteínas."
+            "explicacion": f"Recomendado porque {', '.join(motivos[:3])}. Tiene {plato.get('calorias')} kcal y {plato.get('proteinas')}g de proteinas."
         })
 
     scored.sort(key=lambda x: x["score_recomendacion"], reverse=True)
     return scored[:top]
 
 # Función principal que llama el router
-def recomendar_platos(platos: list, perfil: dict, historial_ids: list = [], top: int = 5) -> list:
+def recomendar_platos(platos: list, perfil: dict, historial_ids: list = [], top: int = 3) -> list:
     return recomendar_con_ia(platos, perfil, historial_ids, top)

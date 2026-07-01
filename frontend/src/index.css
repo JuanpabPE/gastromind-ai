@@ -52,6 +52,26 @@
 
 body {
   margin: 0;
+  overflow-x: hidden;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  max-width: 100%;
 }
 
 #root {
@@ -112,10 +132,15 @@ code {
 
 /* Responsivo GastroMind */
 @media (max-width: 768px) {
+  body {
+    min-width: 0;
+  }
+
   #root {
     width: 100% !important;
     border-inline: none !important;
     text-align: left;
+    overflow-x: hidden;
   }
 
   .menu-header-acciones {
@@ -127,6 +152,14 @@ code {
 
   .menu-layout {
     display: block !important;
+  }
+
+  .menu-contenedor {
+    padding: 1rem !important;
+  }
+
+  .menu-grid-platos {
+    grid-template-columns: 1fr !important;
   }
 
   .menu-sidebar {
@@ -142,8 +175,167 @@ code {
     gap: 10px !important;
   }
 
+  .dashboard-contenedor {
+    padding: 1rem !important;
+  }
+
+  .dashboard-grid-resumen {
+    grid-template-columns: 1fr !important;
+  }
+
+  .dashboard-item-historial {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+  }
+
+  .dashboard-item-historial > div:last-child {
+    align-items: flex-start !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+  }
+
   .ficha-modal {
-    width: calc(100% - 1rem) !important;
-    max-height: 88vh !important;
+    width: calc(100vw - 1rem) !important;
+    height: auto !important;
+    max-height: 90svh !important;
+    border-radius: 12px !important;
+  }
+
+  .ficha-contenido {
+    padding: 1.25rem !important;
+    padding-top: 2.75rem !important;
+  }
+
+  .ficha-alerta-item {
+    grid-template-columns: 1fr !important;
+    gap: 2px !important;
+  }
+
+  .ficha-grid-nutri {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .chat-boton {
+    right: 1rem !important;
+    bottom: 1rem !important;
+    left: auto !important;
+    top: auto !important;
+    max-width: calc(100vw - 2rem) !important;
+    padding: 10px 14px !important;
+    font-size: 0.82rem !important;
+  }
+
+  .chat-overlay {
+    padding: 0.5rem !important;
+    align-items: flex-end !important;
+  }
+
+  .chat-ventana {
+    width: calc(100vw - 1rem) !important;
+    height: min(82svh, 620px) !important;
+    border-radius: 12px !important;
+  }
+
+  .chat-header {
+    align-items: flex-start !important;
+    gap: 10px !important;
+    flex-wrap: wrap !important;
+  }
+
+  .chat-header-acciones {
+    width: 100% !important;
+    justify-content: flex-end !important;
+  }
+
+  .chat-input-area {
+    align-items: stretch !important;
+  }
+
+  .evaluacion-pagina {
+    padding: 1rem !important;
+  }
+
+  .evaluacion-header {
+    align-items: flex-start !important;
+  }
+
+  .evaluacion-marca {
+    align-items: flex-start !important;
+  }
+
+  .evaluacion-panel {
+    padding: 1rem !important;
+  }
+
+  .evaluacion-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .evaluacion-tabla {
+    overflow: visible !important;
+  }
+
+  .evaluacion-fila {
+    grid-template-columns: 1fr !important;
+    gap: 4px !important;
+    padding: 0.9rem !important;
+  }
+
+  .evaluacion-fila span,
+  .evaluacion-fila strong {
+    overflow-wrap: anywhere;
+  }
+
+  .mozo-gestion-pagina {
+    padding: 1rem !important;
+  }
+
+  .mozo-gestion-header {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .mozo-gestion-header > div:last-child {
+    width: 100% !important;
+    flex-wrap: wrap !important;
+  }
+
+  .mozo-gestion-layout {
+    grid-template-columns: 1fr !important;
+  }
+
+  .mozo-gestion-pedido {
+    position: static !important;
+  }
+
+  .admin-pagina {
+    padding: 1rem !important;
+  }
+
+  .admin-pagina [style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  .admin-pagina [style*="display: grid"],
+  .admin-pagina [style*="display:grid"] {
+    min-width: 0 !important;
+  }
+
+  .admin-pagina [style*="white-space: nowrap"] {
+    white-space: normal !important;
+  }
+
+  .admin-pagina * {
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 420px) {
+  .ficha-grid-nutri {
+    grid-template-columns: 1fr !important;
+  }
+
+  .chat-input-area {
+    flex-direction: column !important;
   }
 }

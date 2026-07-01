@@ -15,6 +15,9 @@ from chatbot_nutricionista.router import router as chatbot_router
 from historial_consumo.router import router as historial_router
 from pedidos.router import router as pedidos_router
 from premios.router import router as premios_router
+from evaluacion_ia.router import router as evaluacion_ia_router
+
+logger = logging.getLogger("gastromind")
 
 app = FastAPI(title="GastroMind AI", version="1.0.0")
 
@@ -80,6 +83,7 @@ app.include_router(chatbot_router)
 app.include_router(historial_router)
 app.include_router(pedidos_router)
 app.include_router(premios_router)
+app.include_router(evaluacion_ia_router)
 
 @app.get("/")
 def root():

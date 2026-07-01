@@ -48,6 +48,7 @@ export default function BotonChat() {
   return (
     <>
       <button
+        className="chat-boton"
         ref={botonRef}
         onMouseDown={onMouseDown}
         onClick={handleClick}

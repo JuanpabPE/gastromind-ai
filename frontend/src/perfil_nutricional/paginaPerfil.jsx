@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePerfil } from "./usePerfil";
 import logoTanta from "../assets/images/logo_tanta.png";

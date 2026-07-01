@@ -1,14 +1,16 @@
 export default function TarjetaRecomendacion({ plato, posicion, onClick }) {
+  const explicacion = (
+    plato.explicacion || "Compatible con tus preferencias y restricciones."
+  )
+    .replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, "")
+    .trim();
+
   return (
     <div style={estilos.item} onClick={() => onClick && onClick(plato)}>
       <div style={estilos.numero}>{posicion}</div>
       <div style={{ flex: 1 }}>
         <p style={estilos.nombre}>{plato.nombre}</p>
-        <p style={estilos.explicacion}>
-          {plato.explicacion
-            .replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, "")
-            .trim()}
-        </p>
+        <p style={estilos.explicacion}>{explicacion}</p>
         <p style={estilos.info}>
           {plato.calorias} kcal · S/. {plato.precio}
         </p>
