@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "./useAuth";
 import { useNavigate, Link } from "react-router-dom";
-// TODO: reemplazar por el logo real en ../assets/images/logo_tanta.png
-import logoTanta from "../assets/hero.png";
+import logoTanta from "../assets/images/logo_tanta.png";
 
 export default function PaginaLogin() {
   const { login, cargando, error } = useAuth();

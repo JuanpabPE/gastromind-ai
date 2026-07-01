@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "./useAuth";
 import { useNavigate, Link } from "react-router-dom";
-// TODO: reemplazar por el logo real en ../assets/images/logo_tanta.png
-import logoTanta from "../assets/hero.png";
+import logoTanta from "../assets/images/logo_tanta.png";
 
 // Criterios de validación de contraseña
 const CRITERIOS_CONTRASEÑA = {
@@ -79,7 +78,8 @@ export default function PaginaRegister() {
   });
   const [mostrarPassword, setMostrarPassword] = useState(false);
   const [mostrarConfirmPassword, setMostrarConfirmPassword] = useState(false);
-  const [mostrarTooltipSugerencia, setMostrarTooltipSugerencia] = useState(false);
+  const [mostrarTooltipSugerencia, setMostrarTooltipSugerencia] =
+    useState(false);
   const [contraseñaSugerida, setContraseñaSugerida] = useState("");
 
   const fortaleza = evaluarFortalezaContraseña(form.password);

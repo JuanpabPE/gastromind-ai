@@ -4,7 +4,7 @@ from .prompts import SISTEMA_NUTRICIONISTA, construir_contexto_perfil
 
 def obtener_menu_texto() -> str:
     response = supabase.table("menu")\
-        .select("nombre, categoria, calorias, proteinas, carbohidratos, grasas, precio, alergenos, apto_vegetariano, apto_vegano, apto_sin_gluten, apto_diabetes, apto_hipertension")\
+        .select("nombre, categoria, calorias, precio, alergenos, apto_vegetariano, apto_vegano, apto_sin_gluten, apto_diabetes, apto_hipertension")\
         .eq("disponible", True)\
         .execute()
     
@@ -27,7 +27,6 @@ def obtener_menu_texto() -> str:
         
         lineas.append(
             f"- {p['nombre']} | S/.{p['precio']} | {p['calorias']} kcal | "
-            f"Prot: {p['proteinas']}g | Carbs: {p['carbohidratos']}g | Grasas: {p['grasas']}g | "
             f"Alérgenos: {alergenos} | {', '.join(restricciones) if restricciones else 'sin restricciones'}"
         )
     
@@ -58,7 +57,7 @@ REGLAS IMPORTANTES:
         response = groq_client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[{"role": "system", "content": sistema}] + mensajes,
-            max_tokens=300,
+            max_tokens=150,
             temperature=0.7,
         )
 
