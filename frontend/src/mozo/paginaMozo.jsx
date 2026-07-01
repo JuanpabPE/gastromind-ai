@@ -53,12 +53,16 @@ export default function PaginaMozo() {
     cargarPremios();
   }, []);
 
-  const cargarMesas = useCallback(async () => {
+  useEffect(() => {
+    if (mozo) cargarMesas();
+  }, [sedeActual, mozo]);
+
+  async function cargarMesas() {
     setCargando(true);
     const data = await obtenerMesas(sedeActual);
     setMesas(data);
     setCargando(false);
-  }, [sedeActual]);
+  }
 
   async function cargarPremios() {
     const {
